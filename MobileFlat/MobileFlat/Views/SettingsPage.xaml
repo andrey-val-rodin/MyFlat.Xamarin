@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:MobileFlat.ViewModels"
+             x:DataType="viewmodels:SettingsModel"
+             x:Class="MobileFlat.Views.SettingsPage"
+             Title="Введите логины и пароли кабинетов">
+    
+        <StackLayout>
+            <TableView Intent="Settings">
+                <TableRoot>
+                    <TableSection Title="МосОблЕирц">
+                        <EntryCell Label="Логин" Text="{Binding MosOblEircUser}"/>
+                        <EntryCell Label="Пароль" Text="{Binding MosOblEircPassword}"/>
+                    </TableSection>
+                    <TableSection Title="Глобус">
+                        <EntryCell Label="Логин" Text="{Binding GlobusUser}"/>
+                        <EntryCell Label="Пароль" Text="{Binding GlobusPassword}"/>
+                    </TableSection>
+                </TableRoot>
+            </TableView>
+            <Button Text="Проверить и сохранить" Command="{Binding CheckAndSaveCommand}"/>
+        </StackLayout>
+</ContentPage>
