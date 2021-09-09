@@ -11,7 +11,7 @@ namespace MobileFlat
             MainPage = new AppShell();
         }
 
-        protected override async void OnStart()
+        protected override void OnStart()
         {
         }
 
