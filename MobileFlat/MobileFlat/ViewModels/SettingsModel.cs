@@ -66,7 +66,7 @@ namespace MobileFlat.ViewModels
                 return false;
 
             await Config.SaveAsync(model);
-            await Shell.Current.GoToAsync("//MainPage");
+            _messenger.ShowMessage("Учётные данные успешно сохранены");
             return true;
         }
 

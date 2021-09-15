@@ -105,7 +105,7 @@
                 <Label Text="{Binding ElectricityOldMeter}" FontSize="24" VerticalOptions="End" Padding="12"/>
             </StackLayout>
         </StackLayout>
-        <Button Text="Передать показания" Command="{Binding PassMetersCommand}" VerticalOptions="EndAndExpand"/>
+        <Button Text="Передать показания" Command="{Binding PassMetersCommand}"/>
     </StackLayout>
 
 </ContentPage>

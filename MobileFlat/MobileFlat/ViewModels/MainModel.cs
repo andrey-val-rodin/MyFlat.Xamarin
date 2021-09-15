@@ -114,7 +114,6 @@ namespace MobileFlat.ViewModels
             {
                 MosOblEircText = "Нет учётных данных";
                 GlobusText = "Нет учётных данных";
-                await Shell.Current.GoToAsync("//SettingsPage");
                 return false;
             }
 
@@ -141,7 +140,8 @@ namespace MobileFlat.ViewModels
             CanPassWaterMeters = _webService.CanPassWaterMeters;
             CanPassElectricityMeter = _webService.CanPassElectricityMeter;
             // Enable button "Передать показания" if value changed
-            SetProperty(ref oldCanPassMeters, CanPassMeters, "CanPassMeters");
+            if (oldCanPassMeters != CanPassMeters)
+                ((Command)PassMetersCommand).ChangeCanExecute();
 
             return true;
         }
