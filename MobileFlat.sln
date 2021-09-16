@@ -5,7 +5,9 @@ VisualStudioVersion = 16.0.31624.102
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MobileFlat.Android", "MobileFlat\MobileFlat.Android\MobileFlat.Android.csproj", "{2A4E4385-D078-40A8-9E9A-73FC2946408B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MobileFlat", "MobileFlat\MobileFlat\MobileFlat.csproj", "{97F612BA-AB99-4D3C-9D05-F53004D9674C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MobileFlat", "MobileFlat\MobileFlat\MobileFlat.csproj", "{97F612BA-AB99-4D3C-9D05-F53004D9674C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "Tests\Tests.csproj", "{A53E81A9-5C95-455E-A5C3-8E209E024E6A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -25,6 +27,10 @@ Global
 		{97F612BA-AB99-4D3C-9D05-F53004D9674C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{97F612BA-AB99-4D3C-9D05-F53004D9674C}.Release|Any CPU.Build.0 = Release|Any CPU
 		{97F612BA-AB99-4D3C-9D05-F53004D9674C}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{A53E81A9-5C95-455E-A5C3-8E209E024E6A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A53E81A9-5C95-455E-A5C3-8E209E024E6A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A53E81A9-5C95-455E-A5C3-8E209E024E6A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A53E81A9-5C95-455E-A5C3-8E209E024E6A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
