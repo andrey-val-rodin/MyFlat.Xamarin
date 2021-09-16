@@ -14,6 +14,8 @@ namespace MobileFlat.ViewModels
         private readonly IMessenger _messenger;
         private readonly WebService _webService;
         private Main _model;
+        bool _isBusy = false;
+        bool _isEnabled = true;
         private string _mosOblEircText;
         private string _globusText;
         private string _kitchenColdWaterOldMeter;
@@ -27,7 +29,20 @@ namespace MobileFlat.ViewModels
         public Command OpenMosOblEircCommand { get; }
         public Command OpenGlobusCommand { get; }
         public Command PassMetersCommand { get; }
-        
+        public Command RefreshCommand { get; }
+
+        public bool IsBusy
+        {
+            get { return _isBusy; }
+            set { SetProperty(ref _isBusy, value); }
+        }
+
+        public bool IsEnabled
+        {
+            get { return _isEnabled; }
+            set { SetProperty(ref _isEnabled, value); }
+        }
+
         public string MosOblEircText
         {
             get => _mosOblEircText;
@@ -101,47 +116,57 @@ namespace MobileFlat.ViewModels
                 await Browser.OpenAsync("https://lk.globusenergo.ru"));
             PassMetersCommand = new Command(async () =>
                 await PassMetersAsync(), () => CanPassMeters);
+            RefreshCommand = new Command(async () =>
+                await InitializeAsync());
         }
 
         public async Task<bool> InitializeAsync()
         {
-            MosOblEircText = "Загрузка...";
-            GlobusText = "Загрузка...";
-
-            if (!Config.IsSet)
+            _isBusy = true;
+            try
             {
-                MosOblEircText = "Нет учётных данных";
-                GlobusText = "Нет учётных данных";
-                return false;
-            }
+                MosOblEircText = "Загрузка...";
+                GlobusText = "Загрузка...";
 
-            _model = await _webService.GetModelAsync();
-            if (_model == null)
+                if (!Config.IsSet)
+                {
+                    MosOblEircText = "Нет учётных данных";
+                    GlobusText = "Нет учётных данных";
+                    return false;
+                }
+
+                _model = await _webService.GetModelAsync();
+                if (_model == null)
+                {
+                    MosOblEircText = "Ошибка";
+                    GlobusText = "Ошибка";
+                    return false;
+                }
+
+                MosOblEircText = _model.MosOblEircBalance == 0 ?
+                    "Оплачено" : $"Выставлен счёт на {_model.MosOblEircBalance} руб";
+                GlobusText = _model.GlobusBalance == 0 ?
+                    "Оплачено" : $"Выставлен счёт на {_model.GlobusBalance} руб";
+
+                KitchenColdWaterOldMeter = _model.Meters.KitchenColdWaterMeter.ToString();
+                KitchenHotWaterOldMeter = _model.Meters.KitchenHotWaterMeter.ToString();
+                BathroomColdWaterOldMeter = _model.Meters.BathroomColdWaterMeter.ToString();
+                BathroomHotWaterOldMeter = _model.Meters.BathroomHotWaterMeter.ToString();
+                ElectricityOldMeter = _model.Meters.ElectricityMeter.ToString();
+
+                var oldCanPassMeters = CanPassMeters;
+                CanPassWaterMeters = _webService.CanPassWaterMeters;
+                CanPassElectricityMeter = _webService.CanPassElectricityMeter;
+                // Enable button "Передать показания" if value changed
+                if (oldCanPassMeters != CanPassMeters)
+                    PassMetersCommand.ChangeCanExecute();
+
+                return true;
+            }
+            finally
             {
-                MosOblEircText = "Ошибка";
-                GlobusText = "Ошибка";
-                return false;
+                IsBusy = false;
             }
-
-            MosOblEircText = _model.MosOblEircBalance == 0 ?
-                "Оплачено" : $"Выставлен счёт на {_model.MosOblEircBalance} руб";
-            GlobusText = _model.GlobusBalance == 0 ?
-                "Оплачено" : $"Выставлен счёт на {_model.GlobusBalance} руб";
-
-            KitchenColdWaterOldMeter = _model.Meters.KitchenColdWaterMeter.ToString();
-            KitchenHotWaterOldMeter = _model.Meters.KitchenHotWaterMeter.ToString();
-            BathroomColdWaterOldMeter = _model.Meters.BathroomColdWaterMeter.ToString();
-            BathroomHotWaterOldMeter = _model.Meters.BathroomHotWaterMeter.ToString();
-            ElectricityOldMeter = _model.Meters.ElectricityMeter.ToString();
-
-            var oldCanPassMeters = CanPassMeters;
-            CanPassWaterMeters = _webService.CanPassWaterMeters;
-            CanPassElectricityMeter = _webService.CanPassElectricityMeter;
-            // Enable button "Передать показания" if value changed
-            if (oldCanPassMeters != CanPassMeters)
-                PassMetersCommand.ChangeCanExecute();
-
-            return true;
         }
 
         private async Task<bool> PassMetersAsync()
@@ -152,21 +177,30 @@ namespace MobileFlat.ViewModels
                 return false;
             }
 
-            var meters = CreateMeters();
-            var error = ValidateMeters(meters);
-            if (!string.IsNullOrEmpty(error))
+            IsEnabled = false;
+            try
             {
-                await _messenger.ShowErrorAsync(error);
+                var meters = CreateMeters();
+                var error = ValidateMeters(meters);
+                if (!string.IsNullOrEmpty(error))
+                {
+                    await _messenger.ShowErrorAsync(error);
+                    return false;
+                }
+
+                if (await _webService.SetMetersAsync(meters))
+                {
+                    await _messenger.ShowMessageAsync("Показания успешно переданы");
+                    // Trigger initialization
+                    IsBusy = true;
+                }
+
                 return false;
             }
-
-            if (await _webService.SetMetersAsync(meters))
+            finally
             {
-                await _messenger.ShowMessageAsync("Показания успешно переданы");
-                await InitializeAsync();
+                IsEnabled = true;
             }
-
-            return false;
         }
 
         private Meters CreateMeters()

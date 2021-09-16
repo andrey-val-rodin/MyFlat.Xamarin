@@ -16,7 +16,7 @@ namespace MobileFlat
 
         protected override async void OnStart()
         {
-            var mainPage = (MainPage)Shell.Current.CurrentPage;
+            var mainPage = Shell.Current.CurrentPage as MainPage;
             var mainModel = mainPage?.viewModel;
             if (mainModel == null)
                 throw new InvalidOperationException("Missing MainPage or MainModel");
@@ -30,7 +30,8 @@ namespace MobileFlat
                 return;
             }
 
-            await mainModel.InitializeAsync();
+            // Trigger initialization
+            mainModel.IsBusy = true;
         }
 
         protected override void OnSleep()

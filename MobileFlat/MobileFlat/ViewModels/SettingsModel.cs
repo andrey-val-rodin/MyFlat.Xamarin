@@ -69,12 +69,14 @@ namespace MobileFlat.ViewModels
             await Config.SaveAsync(model);
             await _messenger.ShowMessageAsync("Учётные данные успешно сохранены");
             await Shell.Current.GoToAsync("//MainPage");
-            var mainPage = (MainPage)Shell.Current.CurrentPage;
+            var mainPage = Shell.Current.CurrentPage as MainPage;
             var mainModel = mainPage?.viewModel;
             if (mainModel == null)
                 throw new InvalidOperationException("Missing MainPage or MainModel");
 
-            await mainModel.InitializeAsync();
+            // Trigger initialization
+            mainModel.IsBusy = true;
+
             return true;
         }
 
