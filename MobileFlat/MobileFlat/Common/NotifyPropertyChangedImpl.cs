@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
-namespace MobileFlat.ViewModels
+namespace MobileFlat.Common
 {
-    public class BaseViewModel : INotifyPropertyChanged
+    public class NotifyPropertyChangedImpl : INotifyPropertyChanged
     {
         protected bool SetProperty<T>(ref T backingStore, T value,
             [CallerMemberName] string propertyName = "",

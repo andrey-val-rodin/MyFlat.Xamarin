@@ -1,8 +1,10 @@
-﻿namespace MobileFlat.Common
+﻿using System.Threading.Tasks;
+
+namespace MobileFlat.Common
 {
     public interface IMessenger
     {
-        void ShowMessage(string message);
-        void ShowError(string message);
+        Task ShowMessageAsync(string message);
+        Task ShowErrorAsync(string message);
     }
 }

@@ -9,7 +9,7 @@ using Xamarin.Forms;
 
 namespace MobileFlat.ViewModels
 {
-    public class MainModel : BaseViewModel
+    public class MainModel : NotifyPropertyChangedImpl
     {
         private readonly IMessenger _messenger;
         private readonly WebService _webService;
@@ -24,9 +24,9 @@ namespace MobileFlat.ViewModels
         private bool _canPassWaterMeters;
         private bool _canPassElectricityMeter;
 
-        public ICommand OpenMosOblEircCommand { get; }
-        public ICommand OpenGlobusCommand { get; }
-        public ICommand PassMetersCommand { get; }
+        public Command OpenMosOblEircCommand { get; }
+        public Command OpenGlobusCommand { get; }
+        public Command PassMetersCommand { get; }
         
         public string MosOblEircText
         {
@@ -101,15 +101,13 @@ namespace MobileFlat.ViewModels
                 await Browser.OpenAsync("https://lk.globusenergo.ru"));
             PassMetersCommand = new Command(async () =>
                 await PassMetersAsync(), () => CanPassMeters);
-
-            MosOblEircText = "Загрузка...";
-            GlobusText = "Загрузка...";
         }
 
         public async Task<bool> InitializeAsync()
         {
-            if (!Config.IsSet)
-                await Config.LoadAsync();
+            MosOblEircText = "Загрузка...";
+            GlobusText = "Загрузка...";
+
             if (!Config.IsSet)
             {
                 MosOblEircText = "Нет учётных данных";
@@ -141,7 +139,7 @@ namespace MobileFlat.ViewModels
             CanPassElectricityMeter = _webService.CanPassElectricityMeter;
             // Enable button "Передать показания" if value changed
             if (oldCanPassMeters != CanPassMeters)
-                ((Command)PassMetersCommand).ChangeCanExecute();
+                PassMetersCommand.ChangeCanExecute();
 
             return true;
         }
@@ -150,7 +148,7 @@ namespace MobileFlat.ViewModels
         {
             if (!CanPassMeters)
             {
-                _messenger.ShowError("Ещё не время передавать показания");
+                await _messenger.ShowErrorAsync("Ещё не время передавать показания");
                 return false;
             }
 
@@ -158,13 +156,13 @@ namespace MobileFlat.ViewModels
             var error = ValidateMeters(meters);
             if (!string.IsNullOrEmpty(error))
             {
-                _messenger.ShowError(error);
+                await _messenger.ShowErrorAsync(error);
                 return false;
             }
 
             if (await _webService.SetMetersAsync(meters))
             {
-                _messenger.ShowMessage("Показания успешно переданы");
+                await _messenger.ShowMessageAsync("Показания успешно переданы");
                 await InitializeAsync();
             }
 

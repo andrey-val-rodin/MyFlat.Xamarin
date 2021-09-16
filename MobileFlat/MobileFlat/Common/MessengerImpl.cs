@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Xamarin.Forms;
 
 namespace MobileFlat.Common
@@ -12,14 +13,14 @@ namespace MobileFlat.Common
             _page = page ?? throw new ArgumentNullException(nameof(page));
         }
 
-        public void ShowError(string message)
+        public async Task ShowErrorAsync(string message)
         {
-            _page.DisplayAlert("Ошибка!", message, "OK");
+            await _page.DisplayAlert("Ошибка!", message, "OK");
         }
 
-        public void ShowMessage(string message)
+        public async Task ShowMessageAsync(string message)
         {
-            _page.DisplayAlert("", message, "OK");
+            await _page.DisplayAlert("", message, "OK");
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using MobileFlat.Common;
 using MobileFlat.Models;
 using MobileFlat.Services;
+using MobileFlat.Views;
 using System;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -8,7 +9,7 @@ using Xamarin.Forms;
 
 namespace MobileFlat.ViewModels
 {
-    public class SettingsModel : BaseViewModel
+    public class SettingsModel : NotifyPropertyChangedImpl
     {
         private readonly IMessenger _messenger;
         private readonly WebService _webService;
@@ -58,7 +59,7 @@ namespace MobileFlat.ViewModels
             var model = CreateModel();
             if (!model.IsSet)
             {
-                _messenger.ShowError("Заполните все поля");
+                await _messenger.ShowErrorAsync("Заполните все поля");
                 return false;
             }
 
@@ -66,7 +67,14 @@ namespace MobileFlat.ViewModels
                 return false;
 
             await Config.SaveAsync(model);
-            _messenger.ShowMessage("Учётные данные успешно сохранены");
+            await _messenger.ShowMessageAsync("Учётные данные успешно сохранены");
+            await Shell.Current.GoToAsync("//MainPage");
+            var mainPage = (MainPage)Shell.Current.CurrentPage;
+            var mainModel = mainPage?.viewModel;
+            if (mainModel == null)
+                throw new InvalidOperationException("Missing MainPage or MainModel");
+
+            await mainModel.InitializeAsync();
             return true;
         }
 

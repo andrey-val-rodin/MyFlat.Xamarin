@@ -11,7 +11,7 @@ namespace MobileFlat.Views
         public SettingsPage()
         {
             InitializeComponent();
-            _viewModel = new SettingsModel(new MessengerImpl(this));
+            _viewModel = new SettingsModel(new MessengerImpl(Shell.Current));
             BindingContext = _viewModel;
 
             _viewModel.MosOblEircUser = Config.MosOblEircUser;

@@ -6,20 +6,13 @@ namespace MobileFlat.Views
 {
     public partial class MainPage : ContentPage
     {
-        private readonly MainModel _viewModel;
+        public readonly MainModel viewModel;
 
         public MainPage()
         {
             InitializeComponent();
-            _viewModel = new MainModel(new MessengerImpl(this));
-            BindingContext = _viewModel;
-        }
-
-        protected override async void OnAppearing()
-        {
-            base.OnAppearing();
-
-            await _viewModel.InitializeAsync();
+            viewModel = new MainModel(new MessengerImpl(Shell.Current));
+            BindingContext = viewModel;
         }
     }
 }

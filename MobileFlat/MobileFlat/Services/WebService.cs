@@ -91,7 +91,7 @@ namespace MobileFlat.Services
                     BathroomHotWater == null ||
                     Electricity == null)
                 {
-                    _messenger.ShowError("Нет показаний счётчика");
+                    await _messenger.ShowErrorAsync("Нет показаний счётчика");
                     return null;
                 }
             }

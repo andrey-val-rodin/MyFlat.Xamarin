@@ -51,7 +51,7 @@ namespace MobileFlat.Services
             var response = await SendAsync(request);
             if (response?.StatusCode != HttpStatusCode.OK)
             {
-                _messenger.ShowError(
+                await _messenger.ShowErrorAsync(
                     $"Глобус вернул код ошибки {response?.StatusCode.ToString()}");
                 return false;
             }
@@ -59,21 +59,21 @@ namespace MobileFlat.Services
             var html = await response.Content.ReadAsStringAsync();
             if (html.Contains("ERROR|Неверный логин или пароль"))
             {
-                _messenger.ShowError("Глобус: Неверный логин или пароль");
+                await _messenger.ShowErrorAsync("Глобус: Неверный логин или пароль");
                 Reset();
                 return false;
             }
 
             if (!HtmlParser.TryGetSessionId(html, out _bitrixSessionId))
             {
-                _messenger.ShowError("Глобус: ошибка при получении Bitrix SessionId");
+                await _messenger.ShowErrorAsync("Глобус: ошибка при получении Bitrix SessionId");
                 Reset();
                 return false;
             }
 
             if (!HtmlParser.TryGetBalance(html, out decimal result))
             {
-                _messenger.ShowError("Ошибка при получении баланса из Глобуса");
+                await _messenger.ShowErrorAsync("Ошибка при получении баланса из Глобуса");
                 Reset();
                 return false;
             }
@@ -114,7 +114,7 @@ namespace MobileFlat.Services
             var response = await SendAsync(request);
             if (response?.StatusCode != HttpStatusCode.OK)
             {
-                _messenger.ShowError(
+                await _messenger.ShowErrorAsync(
                     $"Глобус вернул код ошибки {response?.StatusCode.ToString()}");
                 return false;
             }
@@ -132,7 +132,7 @@ namespace MobileFlat.Services
             }
             catch (HttpRequestException e)
             {
-                _messenger.ShowError(e.Message);
+                await _messenger.ShowErrorAsync(e.Message);
             }
 
             return response;
@@ -181,7 +181,7 @@ namespace MobileFlat.Services
             var response = await SendAsync(request);
             if (response?.StatusCode != HttpStatusCode.OK)
             {
-                _messenger.ShowError(
+                await _messenger.ShowErrorAsync(
                     $"Глобус вернул код ошибки {response?.StatusCode.ToString()}");
                 return null;
             }
@@ -189,7 +189,7 @@ namespace MobileFlat.Services
             var html = await response.Content.ReadAsStringAsync();
             if (!HtmlParser.TryGetBalance(html, out decimal result))
             {
-                _messenger.ShowError("Ошибка при получении баланса из Глобуса");
+                await _messenger.ShowErrorAsync("Ошибка при получении баланса из Глобуса");
                 return null;
             }
 
@@ -209,7 +209,7 @@ namespace MobileFlat.Services
             var response = await SendAsync(request);
             if (response?.StatusCode != HttpStatusCode.OK)
             {
-                _messenger.ShowError(
+                await _messenger.ShowErrorAsync(
                     $"Глобус вернул код ошибки {response?.StatusCode.ToString()}");
                 return false;
             }
@@ -218,7 +218,7 @@ namespace MobileFlat.Services
             if (html.Contains("errortext") ||
                 Regex.Matches(html, "Показания сохранены").Count != 2)
             {
-                _messenger.ShowError(
+                await _messenger.ShowErrorAsync(
                     $"Ошибка во время передачи показаний в Глобус");
                 return false;
             }

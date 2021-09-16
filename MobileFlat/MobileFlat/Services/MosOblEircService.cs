@@ -47,7 +47,7 @@ namespace MobileFlat.Services
             var response = await SendAsync(request);
             if (response?.StatusCode != HttpStatusCode.OK)
             {
-                _messenger.ShowError(
+                await _messenger.ShowErrorAsync(
                     $"МосОблЕирц вернул код ошибки {response?.StatusCode.ToString()}");
                 return false;
             }
@@ -57,7 +57,7 @@ namespace MobileFlat.Services
             var data = result.Data.FirstOrDefault();
             if (data == null || data.Nm_result != "Ошибок нет")
             {
-                _messenger.ShowError("МосОблЕирц:" + data.Nm_result);
+                await _messenger.ShowErrorAsync("МосОблЕирц:" + data.Nm_result);
                 return false;
             }
 
@@ -79,7 +79,7 @@ namespace MobileFlat.Services
             var response = await SendAsync(request);
             if (response?.StatusCode != HttpStatusCode.OK)
             {
-                _messenger.ShowError(
+                await _messenger.ShowErrorAsync(
                     $"МосОблЕирц вернул код ошибки {response?.StatusCode.ToString()}");
                 return false;
             }
@@ -89,7 +89,7 @@ namespace MobileFlat.Services
             var data = result.Data.FirstOrDefault();
             if (!result.Success || data == null)
             {
-                _messenger.ShowError(
+                await _messenger.ShowErrorAsync(
                     $"МосОблЕирц: ошибка при получении учётной записи");
             }
 
@@ -113,7 +113,7 @@ namespace MobileFlat.Services
             var response = await SendAsync(request);
             if (response?.StatusCode != HttpStatusCode.OK)
             {
-                _messenger.ShowError(
+                await _messenger.ShowErrorAsync(
                     $"МосОблЕирц вернул код ошибки {response?.StatusCode.ToString()}");
                 return false;
             }
@@ -123,7 +123,7 @@ namespace MobileFlat.Services
             var data = result.Data.FirstOrDefault();
             if (data == null || data.Nm_result != "Ошибок нет")
             {
-                _messenger.ShowError(data.Nm_result);
+                await _messenger.ShowErrorAsync(data.Nm_result);
                 return false;
             }
 
@@ -140,7 +140,7 @@ namespace MobileFlat.Services
             }
             catch (HttpRequestException e)
             {
-                _messenger.ShowError(e.Message);
+                await _messenger.ShowErrorAsync(e.Message);
             }
 
             return response;
@@ -189,7 +189,7 @@ namespace MobileFlat.Services
             var response = await SendAsync(request);
             if (response?.StatusCode != HttpStatusCode.OK)
             {
-                _messenger.ShowError(
+                await _messenger.ShowErrorAsync(
                     $"МосОблЕирц вернул код ошибки {response?.StatusCode.ToString()}");
                 return null;
             }
@@ -198,14 +198,14 @@ namespace MobileFlat.Services
             var result = JsonConvert.DeserializeObject<BalanceDto>(content);
             if (result == null || !result.Success)
             {
-                _messenger.ShowError("Ошибка при попытке получить баланс из МосОблЕирц");
+                await _messenger.ShowErrorAsync("Ошибка при попытке получить баланс из МосОблЕирц");
                 return null;
             }
 
             var child = result.Data?.FirstOrDefault();
             if (child == null)
             {
-                _messenger.ShowError(
+                await _messenger.ShowErrorAsync(
                     "Ошибка при попытке получить баланс из МосОблЕирц. Похоже, структура данных ответа изменилась");
                 return null;
             }
@@ -228,7 +228,7 @@ namespace MobileFlat.Services
             var response = await SendAsync(request);
             if (response?.StatusCode != HttpStatusCode.OK)
             {
-                _messenger.ShowError(
+                await _messenger.ShowErrorAsync(
                     $"МосОблЕирц вернул код ошибки {response?.StatusCode.ToString()}");
                 return null;
             }
@@ -237,7 +237,7 @@ namespace MobileFlat.Services
             var result = JsonConvert.DeserializeObject<MeterDto>(content);
             if (result?.Data.Count == 0)
             {
-                _messenger.ShowError(
+                await _messenger.ShowErrorAsync(
                     "Ошибка при попытке получить показания счётчиков из личного кабинета");
                 return null;
             }
@@ -259,7 +259,7 @@ namespace MobileFlat.Services
             var response = await SendAsync(request);
             if (response?.StatusCode != HttpStatusCode.OK)
             {
-                _messenger.ShowError(
+                await _messenger.ShowErrorAsync(
                     $"МосОблЕирц вернул код ошибки {response?.StatusCode.ToString()}");
                 return false;
             }
@@ -269,7 +269,7 @@ namespace MobileFlat.Services
             if (result?.Success != true ||
                 result.Data?.FirstOrDefault()?.Nm_result != "Показания успешно переданы")
             {
-                _messenger.ShowError(
+                await _messenger.ShowErrorAsync(
                     $"Ошибка во время передачи показаний в МосОблЕирц");
                 return false;
             }
