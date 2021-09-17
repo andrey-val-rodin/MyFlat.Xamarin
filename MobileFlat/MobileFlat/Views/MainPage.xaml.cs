@@ -14,5 +14,10 @@ namespace MobileFlat.Views
             viewModel = new MainModel(new MessengerImpl(Shell.Current));
             BindingContext = viewModel;
         }
+
+        public void OnEntryFocused(object sender, FocusEventArgs e)
+        {
+            viewModel.IsEnabled = false;
+        }
     }
 }
