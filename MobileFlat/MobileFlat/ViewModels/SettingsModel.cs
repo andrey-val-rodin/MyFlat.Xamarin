@@ -74,7 +74,7 @@ namespace MobileFlat.ViewModels
             if (mainModel == null)
                 throw new InvalidOperationException("Missing MainPage or MainModel");
 
-            // Trigger initialization
+            // Trigger initialization: will invoke MainModel.RefreshCommand
             mainModel.IsBusy = true;
 
             return true;

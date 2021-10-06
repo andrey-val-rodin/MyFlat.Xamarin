@@ -64,7 +64,7 @@
                         </StackLayout.Triggers>
                         <StackLayout Orientation="Vertical">
                             <StackLayout Orientation="Horizontal">
-                                <Entry Text="{Binding KitchenColdWaterMeter, Mode=OneWayToSource}"
+                                <Entry Text="{Binding KitchenColdWaterMeter}"
                                        Keyboard="Numeric"
                                        Placeholder="Кухня хол. вода"
                                        FontSize="24"
@@ -72,7 +72,7 @@
                                 <Label Text="{Binding KitchenColdWaterOldMeter}" FontSize="24" VerticalOptions="End" Padding="12"/>
                             </StackLayout>
                             <StackLayout Orientation="Horizontal">
-                                <Entry Text="{Binding KitchenHotWaterMeter, Mode=OneWayToSource}"
+                                <Entry Text="{Binding KitchenHotWaterMeter}"
                                        Keyboard="Numeric"
                                        Placeholder="Кухня гор. вода"
                                        FontSize="24"
@@ -82,7 +82,7 @@
                         </StackLayout>
                         <StackLayout Orientation="Vertical" Margin="64,0">
                             <StackLayout Orientation="Horizontal">
-                                <Entry Text="{Binding BathroomColdWaterMeter, Mode=OneWayToSource}"
+                                <Entry Text="{Binding BathroomColdWaterMeter}"
                                        Keyboard="Numeric"
                                        Placeholder="Санузел хол. вода"
                                        FontSize="24"
@@ -90,7 +90,7 @@
                                 <Label Text="{Binding BathroomColdWaterOldMeter}" FontSize="24" VerticalOptions="End" Padding="12"/>
                             </StackLayout>
                             <StackLayout Orientation="Horizontal">
-                                <Entry Text="{Binding BathroomHotWaterMeter, Mode=OneWayToSource}"
+                                <Entry Text="{Binding BathroomHotWaterMeter}"
                                        Keyboard="Numeric"
                                        Placeholder="Санузел гор. вода"
                                        FontSize="24"
@@ -105,7 +105,7 @@
                                 <Setter Property="BackgroundColor" Value="White"/>
                             </Trigger>
                         </StackLayout.Triggers>
-                        <Entry Text="{Binding ElectricityMeter, Mode=OneWayToSource}"
+                        <Entry Text="{Binding ElectricityMeter}"
                                Keyboard="Numeric"
                                Placeholder="Электричество"
                                FontSize="24"

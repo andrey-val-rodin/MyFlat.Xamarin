@@ -17,6 +17,11 @@ namespace MobileFlat.ViewModels
         bool _isEnabled = true;
         private string _mosOblEircText;
         private string _globusText;
+        private string _kitchenColdWaterMeter;
+        private string _kitchenHotWaterMeter;
+        private string _bathroomColdWaterMeter;
+        private string _bathroomHotWaterMeter;
+        private string _electricityMeter;
         private string _kitchenColdWaterOldMeter;
         private string _kitchenHotWaterOldMeter;
         private string _bathroomColdWaterOldMeter;
@@ -54,11 +59,35 @@ namespace MobileFlat.ViewModels
             set => SetProperty(ref _globusText, value);
         }
 
-        public string KitchenColdWaterMeter { get; set; }
-        public string KitchenHotWaterMeter { get; set; }
-        public string BathroomColdWaterMeter { get; set; }
-        public string BathroomHotWaterMeter { get; set; }
-        public string ElectricityMeter { get; set; }
+        public string KitchenColdWaterMeter
+        {
+            get => _kitchenColdWaterMeter;
+            set => SetProperty(ref _kitchenColdWaterMeter, value);
+        }
+
+        public string KitchenHotWaterMeter
+        {
+            get => _kitchenHotWaterMeter;
+            set => SetProperty(ref _kitchenHotWaterMeter, value);
+        }
+
+        public string BathroomColdWaterMeter
+        {
+            get => _bathroomColdWaterMeter;
+            set => SetProperty(ref _bathroomColdWaterMeter, value);
+        }
+
+        public string BathroomHotWaterMeter
+        {
+            get => _bathroomHotWaterMeter;
+            set => SetProperty(ref _bathroomHotWaterMeter, value);
+        }
+
+        public string ElectricityMeter
+        {
+            get => _electricityMeter;
+            set => SetProperty(ref _electricityMeter, value);
+        }
 
         public string KitchenColdWaterOldMeter
         {
@@ -190,8 +219,13 @@ namespace MobileFlat.ViewModels
                 if (await _webService.SetMetersAsync(meters))
                 {
                     await _messenger.ShowMessageAsync("Показания успешно переданы");
-                    // Trigger initialization
-                    IsBusy = true;
+                    // Reset
+                    KitchenColdWaterMeter = null;
+                    KitchenHotWaterMeter = null;
+                    BathroomColdWaterMeter = null;
+                    BathroomHotWaterMeter = null;
+                    ElectricityMeter = null;
+                    await InitializeAsync();
                 }
 
                 return false;

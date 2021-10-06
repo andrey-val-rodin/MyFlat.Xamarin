@@ -30,7 +30,7 @@ namespace MobileFlat
                 return;
             }
 
-            // Trigger initialization
+            // Trigger initialization: will invoke MainModel.RefreshCommand
             mainModel.IsBusy = true;
         }
 
