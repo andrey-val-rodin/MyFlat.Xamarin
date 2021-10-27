@@ -235,7 +235,7 @@ namespace MobileFlat.Services
 
             var content = await response.Content.ReadAsStringAsync();
             var result = JsonConvert.DeserializeObject<MeterDto>(content);
-            if (result?.Data.Count == 0)
+            if (result?.Data?.Count == 0)
             {
                 await _messenger.ShowErrorAsync(
                     "Ошибка при попытке получить показания счётчиков из личного кабинета");
