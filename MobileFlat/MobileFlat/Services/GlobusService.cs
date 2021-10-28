@@ -93,15 +93,10 @@ namespace MobileFlat.Services
         {
             try
             {
-                var container = new CookieContainer();
                 var uri = new Uri("https://lk.globusenergo.ru/");
-                using var httpClientHandler = new HttpClientHandler { CookieContainer = container };
-                // Disable certificate checking due to problems with Let’s Encrypt certificates
-                httpClientHandler.ServerCertificateCustomValidationCallback +=
-                    (sender, cert, chain, sslPolicyErrors) => true;
-                using var httpClient = new HttpClient(httpClientHandler);
+                using var httpClient = new HttpClientWithCookies();
                 await httpClient.GetAsync(uri);
-                var cookies = container.GetCookies(uri).Cast<Cookie>().ToList();
+                var cookies = httpClient.CookieContainer?.GetCookies(uri)?.Cast<Cookie>()?.ToList();
                 var result = cookies?.FirstOrDefault(c => c.Name == "PHPSESSID")?.Value;
                 if (string.IsNullOrEmpty(result))
                     await _messenger.ShowErrorAsync("Глобус: ошибка при получении SessionId");

@@ -13,8 +13,8 @@
             <StackLayout>
                 <StackLayout Orientation="Horizontal" Padding ="24,10,20,10" BackgroundColor="LightCyan">
                     <StackLayout Orientation="Vertical">
-                        <Label Text="МосОблЕирц" FontSize="30" FontAttributes="Bold"/>
-                        <Label Text="{Binding MosOblEircText}" FontSize="24" TextColor="SaddleBrown">
+                        <Label Text="МосОблЕирц" FontAttributes="Bold"/>
+                        <Label Text="{Binding MosOblEircText}" TextColor="SaddleBrown">
                             <Label.Triggers>
                                 <Trigger Property="Text" Value="Загрузка..." TargetType="Label">
                                     <Setter Property="TextColor" Value="Black"/>
@@ -35,8 +35,8 @@
                 </StackLayout>
                 <StackLayout Orientation="Horizontal" Padding ="24,10,20,10" BackgroundColor="LightCyan">
                     <StackLayout Orientation="Vertical">
-                        <Label Text="Глобус" FontSize="30" FontAttributes="Bold"/>
-                        <Label Text="{Binding GlobusText}" FontSize="24" TextColor="SaddleBrown">
+                        <Label Text="Глобус" FontAttributes="Bold"/>
+                        <Label Text="{Binding GlobusText}" TextColor="SaddleBrown">
                             <Label.Triggers>
                                 <Trigger Property="Text" Value="Загрузка..." TargetType="Label">
                                     <Setter Property="TextColor" Value="Black"/>
@@ -55,62 +55,55 @@
                     VerticalOptions="EndAndExpand"
                     HorizontalOptions="EndAndExpand"/>
                 </StackLayout>
-                <StackLayout Padding="24" BackgroundColor="LightCyan">
-                    <StackLayout Orientation="Horizontal" IsEnabled="{Binding CanPassWaterMeters}">
+                <StackLayout Padding="24" Orientation="Vertical" BackgroundColor="LightCyan">
+                    <StackLayout IsEnabled="{Binding CanPassWaterMeters}">
                         <StackLayout.Triggers>
                             <Trigger Property="IsEnabled" Value="true" TargetType="StackLayout">
                                 <Setter Property="BackgroundColor" Value="White"/>
                             </Trigger>
                         </StackLayout.Triggers>
-                        <StackLayout Orientation="Vertical">
-                            <StackLayout Orientation="Horizontal">
-                                <Entry Text="{Binding KitchenColdWaterMeter}"
-                                       Keyboard="Numeric"
-                                       Placeholder="Кухня хол. вода"
-                                       FontSize="24"
-                                       Focused="OnEntryFocused"/>
-                                <Label Text="{Binding KitchenColdWaterOldMeter}" FontSize="24" VerticalOptions="End" Padding="12"/>
-                            </StackLayout>
-                            <StackLayout Orientation="Horizontal">
-                                <Entry Text="{Binding KitchenHotWaterMeter}"
-                                       Keyboard="Numeric"
-                                       Placeholder="Кухня гор. вода"
-                                       FontSize="24"
-                                       Focused="OnEntryFocused"/>
-                                <Label Text="{Binding KitchenHotWaterOldMeter}" FontSize="24" VerticalOptions="End" Padding="12"/>
-                            </StackLayout>
+                        <StackLayout Orientation="Horizontal">
+                            <Entry Text="{Binding KitchenColdWaterMeter}"
+                                    Keyboard="Numeric"
+                                    Placeholder="Кухня хол. вода"
+                                    Focused="OnEntryFocused"/>
+                            <Label Text="{Binding KitchenColdWaterOldMeter}" VerticalOptions="End" Padding="12"/>
                         </StackLayout>
-                        <StackLayout Orientation="Vertical" Margin="64,0">
-                            <StackLayout Orientation="Horizontal">
-                                <Entry Text="{Binding BathroomColdWaterMeter}"
-                                       Keyboard="Numeric"
-                                       Placeholder="Санузел хол. вода"
-                                       FontSize="24"
-                                       Focused="OnEntryFocused"/>
-                                <Label Text="{Binding BathroomColdWaterOldMeter}" FontSize="24" VerticalOptions="End" Padding="12"/>
-                            </StackLayout>
-                            <StackLayout Orientation="Horizontal">
-                                <Entry Text="{Binding BathroomHotWaterMeter}"
-                                       Keyboard="Numeric"
-                                       Placeholder="Санузел гор. вода"
-                                       FontSize="24"
-                                       Focused="OnEntryFocused"/>
-                                <Label Text="{Binding BathroomHotWaterOldMeter}" FontSize="24" VerticalOptions="End" Padding="12"/>
-                            </StackLayout>
+                        <StackLayout Orientation="Horizontal">
+                            <Entry Text="{Binding KitchenHotWaterMeter}"
+                                    Keyboard="Numeric"
+                                    Placeholder="Кухня гор. вода"
+                                    Focused="OnEntryFocused"/>
+                            <Label Text="{Binding KitchenHotWaterOldMeter}" VerticalOptions="End" Padding="12"/>
+                        </StackLayout>
+                        <StackLayout Orientation="Horizontal">
+                            <Entry Text="{Binding BathroomColdWaterMeter}"
+                                    Keyboard="Numeric"
+                                    Placeholder="Санузел хол. вода"
+                                    Focused="OnEntryFocused"/>
+                            <Label Text="{Binding BathroomColdWaterOldMeter}" VerticalOptions="End" Padding="12"/>
+                        </StackLayout>
+                        <StackLayout Orientation="Horizontal">
+                            <Entry Text="{Binding BathroomHotWaterMeter}"
+                                    Keyboard="Numeric"
+                                    Placeholder="Санузел гор. вода"
+                                    Focused="OnEntryFocused"/>
+                            <Label Text="{Binding BathroomHotWaterOldMeter}" VerticalOptions="End" Padding="12"/>
                         </StackLayout>
                     </StackLayout>
-                    <StackLayout Orientation="Horizontal" IsEnabled="{Binding CanPassElectricityMeter}">
+                    <StackLayout IsEnabled="{Binding CanPassElectricityMeter}">
                         <StackLayout.Triggers>
                             <Trigger Property="IsEnabled" Value="true" TargetType="StackLayout">
                                 <Setter Property="BackgroundColor" Value="White"/>
                             </Trigger>
                         </StackLayout.Triggers>
-                        <Entry Text="{Binding ElectricityMeter}"
-                               Keyboard="Numeric"
-                               Placeholder="Электричество"
-                               FontSize="24"
-                               Focused="OnEntryFocused"/>
-                        <Label Text="{Binding ElectricityOldMeter}" FontSize="24" VerticalOptions="End" Padding="12"/>
+                        <StackLayout Orientation="Horizontal">
+                            <Entry Text="{Binding ElectricityMeter}"
+                                   Keyboard="Numeric"
+                                   Placeholder="Электричество"
+                                   Focused="OnEntryFocused"/>
+                            <Label Text="{Binding ElectricityOldMeter}" VerticalOptions="End" Padding="12"/>
+                        </StackLayout>
                     </StackLayout>
                 </StackLayout>
                 <Button Text="Передать показания" Command="{Binding PassMetersCommand}"/>
