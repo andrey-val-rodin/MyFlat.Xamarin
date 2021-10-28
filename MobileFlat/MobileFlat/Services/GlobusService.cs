@@ -103,7 +103,7 @@ namespace MobileFlat.Services
 
                 return result;
             }
-            catch (HttpRequestException e)
+            catch (Exception e)
             {
                 await _messenger.ShowErrorAsync("Глобус: ошибка при получении SessionId: " + e.Message);
                 return null;
@@ -202,8 +202,8 @@ namespace MobileFlat.Services
                 return null;
             }
 
-            var html = await response.Content.ReadAsStringAsync();
-            if (!HtmlParser.TryGetBalance(html, out decimal result))
+            var html = await response.Content?.ReadAsStringAsync();
+            if (html == null || !HtmlParser.TryGetBalance(html, out decimal result))
             {
                 await _messenger.ShowErrorAsync("Ошибка при получении баланса из Глобуса");
                 return null;
@@ -230,8 +230,8 @@ namespace MobileFlat.Services
                 return false;
             }
 
-            var html = await response.Content.ReadAsStringAsync();
-            if (html.Contains("errortext") ||
+            var html = await response.Content?.ReadAsStringAsync();
+            if (html == null || html.Contains("errortext") ||
                 Regex.Matches(html, "Показания сохранены").Count != 2)
             {
                 await _messenger.ShowErrorAsync(
