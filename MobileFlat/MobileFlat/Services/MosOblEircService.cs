@@ -69,6 +69,7 @@ namespace MobileFlat.Services
 
             return IsAuthorized;
         }
+
         private T Deserialize<T>(string source) where T: class
         {
             if (string.IsNullOrEmpty(source))
