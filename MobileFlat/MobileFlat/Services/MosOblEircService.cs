@@ -83,77 +83,7 @@ namespace MobileFlat.Services
                 return null;
             }
         }
-
-        private async Task<bool> RetrieveAccountInfoAsync()
-        {
-            var request = CreateRequest(
-                new Uri($"https://my.mosenergosbyt.ru/gate_lkcomu?action=sql&query=LSList&session={_sessionId}"),
-                "",
-                "https://my.mosenergosbyt.ru/accounts/0"
-                );
-
-            var response = await SendAsync(request);
-            if (response?.StatusCode != HttpStatusCode.OK)
-            {
-                await _messenger.ShowErrorAsync(
-                    $"МосОблЕирц вернул код ошибки {response?.StatusCode.ToString()}");
-                return false;
-            }
-
-            var content = await response.Content?.ReadAsStringAsync();
-            var result = Deserialize<AccountDto>(content);
-            var data = result?.Data?.FirstOrDefault();
-            if (!result.Success || data == null)
-            {
-                await _messenger.ShowErrorAsync(
-                    $"МосОблЕирц: ошибка при получении данных учётной записи");
-            }
-
-            _accountId = data.Id_service;
-            var abonent = Deserialize<AbonentDto>(data.Vl_provider);
-            if (abonent == null)
-            {
-                await _messenger.ShowErrorAsync(
-                    $"МосОблЕирц: ошибка при получении данных учётной записи");
-            }
-            _abonentId = abonent.Id_abonent;
-
-            return true;
-        }
-
-        public async Task<bool> LogoffAsync()
-        {
-            if (!IsAuthorized)
-                throw new InvalidOperationException();
-
-            var request = CreateRequest(
-                new Uri($"https://my.mosenergosbyt.ru/gate_lkcomu?action=invalidate&query=ProfileExit&session={_sessionId}"),
-                "vl_token=",
-                $"https://my.mosenergosbyt.ru/accounts/{_accountId}/events/payment-doc");
-
-            var response = await SendAsync(request);
-            if (response?.StatusCode != HttpStatusCode.OK)
-            {
-                await _messenger.ShowErrorAsync(
-                    $"МосОблЕирц вернул код ошибки {response?.StatusCode.ToString()}");
-                return false;
-            }
-
-            var content = await response.Content?.ReadAsStringAsync();
-            var result = Deserialize<AuthorizationDto>(content);
-            var data = result?.Data?.FirstOrDefault();
-            if (data == null || data.Nm_result != "Ошибок нет")
-            {
-                await _messenger.ShowErrorAsync(string.IsNullOrEmpty(data?.Nm_result)
-                    ? "МосОблЕирц: ошибка при выходе из кабинета"
-                    : "МосОблЕирц: " + data?.Nm_result);
-                return false;
-            }
-
-            _sessionId = null;
-            return !IsAuthorized;
-        }
-
+		
         private async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request)
         {
             HttpResponseMessage response = null;
@@ -199,6 +129,78 @@ namespace MobileFlat.Services
             return request;
         }
 
+        private async Task<bool> RetrieveAccountInfoAsync()
+        {
+            var request = CreateRequest(
+                new Uri($"https://my.mosenergosbyt.ru/gate_lkcomu?action=sql&query=LSList&session={_sessionId}"),
+                "",
+                "https://my.mosenergosbyt.ru/accounts/0"
+                );
+
+            var response = await SendAsync(request);
+            if (response?.StatusCode != HttpStatusCode.OK)
+            {
+                await _messenger.ShowErrorAsync(
+                    $"МосОблЕирц вернул код ошибки {response?.StatusCode.ToString()}");
+                return false;
+            }
+
+            var content = await response.Content?.ReadAsStringAsync();
+            var result = Deserialize<AccountDto>(content);
+            var data = result?.Data?.FirstOrDefault();
+            if (!result.Success || data == null)
+            {
+                await _messenger.ShowErrorAsync(
+                    $"МосОблЕирц: ошибка при получении данных учётной записи");
+                return false;
+            }
+
+            _accountId = data.Id_service;
+            var abonent = Deserialize<AbonentDto>(data.Vl_provider);
+            if (abonent == null)
+            {
+                await _messenger.ShowErrorAsync(
+                    $"МосОблЕирц: ошибка при получении данных учётной записи");
+                return false;
+            }
+            _abonentId = abonent.Id_abonent;
+
+            return true;
+        }
+
+        public async Task<bool> LogoffAsync()
+        {
+            if (!IsAuthorized)
+                throw new InvalidOperationException();
+
+            var request = CreateRequest(
+                new Uri($"https://my.mosenergosbyt.ru/gate_lkcomu?action=invalidate&query=ProfileExit&session={_sessionId}"),
+                "vl_token=",
+                $"https://my.mosenergosbyt.ru/accounts/{_accountId}/events/payment-doc");
+
+            var response = await SendAsync(request);
+            if (response?.StatusCode != HttpStatusCode.OK)
+            {
+                await _messenger.ShowErrorAsync(
+                    $"МосОблЕирц вернул код ошибки {response?.StatusCode.ToString()}");
+                return false;
+            }
+
+            var content = await response.Content?.ReadAsStringAsync();
+            var result = Deserialize<AuthorizationDto>(content);
+            var data = result?.Data?.FirstOrDefault();
+            if (data == null || data.Nm_result != "Ошибок нет")
+            {
+                await _messenger.ShowErrorAsync(string.IsNullOrEmpty(data?.Nm_result)
+                    ? "МосОблЕирц: ошибка при выходе из кабинета"
+                    : "МосОблЕирц: " + data?.Nm_result);
+                return false;
+            }
+
+            _sessionId = null;
+            return !IsAuthorized;
+        }
+
         public async Task<Tuple<string, decimal>> GetBalanceAsync()
         {
             if (!IsAuthorized)
@@ -226,10 +228,10 @@ namespace MobileFlat.Services
             }
 
             var child = result.Data?.FirstOrDefault();
-            if (child == null)
+            if (child == null || string.IsNullOrEmpty(child.Dt_period_balance))
             {
                 await _messenger.ShowErrorAsync(
-                    "Ошибка при попытке получить баланс из МосОблЕирц. Похоже, структура данных ответа изменилась");
+                    "Ошибка при попытке получить баланс из МосОблЕирц");
                 return null;
             }
 
