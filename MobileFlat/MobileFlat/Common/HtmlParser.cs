@@ -14,7 +14,7 @@ namespace MobileFlat.Common
             result = 0;
             try
             {
-                var pattern = "\"DEBT_END\" {0,}: {0,}\"[0-9,.]+\"";
+                var pattern = "\"DEBT_END\" {0,}: {0,}\"-?[0-9,.]+\"";
                 var match = Regex.Match(html, pattern);
                 if (!match.Success)
                     return false;
