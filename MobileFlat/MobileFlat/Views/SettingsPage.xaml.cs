@@ -13,11 +13,14 @@ namespace MobileFlat.Views
             InitializeComponent();
             _viewModel = new SettingsModel(new MessengerImpl(Shell.Current));
             BindingContext = _viewModel;
+        }
 
-            _viewModel.MosOblEircUser = Config.MosOblEircUser;
-            _viewModel.MosOblEircPassword = Config.MosOblEircPassword;
-            _viewModel.GlobusUser = Config.GlobusUser;
-            _viewModel.GlobusPassword = Config.GlobusPassword;
+        protected override async void OnAppearing()
+        {
+            _viewModel.MosOblEircUser = await Config.GetMosOblEircUserAsync();
+            _viewModel.MosOblEircPassword = await Config.GetMosOblEircPasswordAsync();
+            _viewModel.GlobusUser = await Config.GetGlobusUserAsync();
+            _viewModel.GlobusPassword = await Config.GetGlobusPasswordAsync();
         }
     }
 }

@@ -70,9 +70,7 @@ namespace MobileFlat.ViewModels
             await _messenger.ShowMessageAsync("Учётные данные успешно сохранены");
             await Shell.Current.GoToAsync("//MainPage");
             var mainPage = Shell.Current.CurrentPage as MainPage;
-            var mainModel = mainPage?.viewModel;
-            if (mainModel == null)
-                throw new InvalidOperationException("Missing MainPage or MainModel");
+            var mainModel = (mainPage?.viewModel) ?? throw new InvalidOperationException("Missing MainPage or MainModel");
 
             // Trigger initialization: will invoke MainModel.RefreshCommand
             mainModel.IsBusy = true;

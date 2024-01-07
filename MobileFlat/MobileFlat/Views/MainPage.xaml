@@ -55,7 +55,7 @@
                     VerticalOptions="EndAndExpand"
                     HorizontalOptions="EndAndExpand"/>
                 </StackLayout>
-                <StackLayout Padding="24" Orientation="Vertical" BackgroundColor="LightCyan">
+                <StackLayout Padding="24" Orientation="Vertical" BackgroundColor="LightCyan" IsVisible="{Binding UseMeters}">
                     <StackLayout IsEnabled="{Binding CanPassWaterMeters}">
                         <StackLayout.Triggers>
                             <Trigger Property="IsEnabled" Value="true" TargetType="StackLayout">
@@ -106,7 +106,7 @@
                         </StackLayout>
                     </StackLayout>
                 </StackLayout>
-                <Button Text="Передать показания" Command="{Binding PassMetersCommand}"/>
+                <Button IsVisible="{Binding UseMeters}" Text="Передать показания" Command="{Binding PassMetersCommand}"/>
             </StackLayout>
         </ScrollView>
     </RefreshView>

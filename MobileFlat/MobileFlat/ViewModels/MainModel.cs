@@ -47,6 +47,8 @@ namespace MobileFlat.ViewModels
             set { SetProperty(ref _isEnabled, value); }
         }
 
+        public bool UseMeters => WebService.UseMeters;
+
         public string MosOblEircText
         {
             get => _mosOblEircText;
@@ -121,7 +123,7 @@ namespace MobileFlat.ViewModels
 
         public bool CanPassWaterMeters
         {
-            get =>_canPassWaterMeters;
+            get => _canPassWaterMeters;
             set => SetProperty(ref _canPassWaterMeters, value);
         }
 
@@ -156,14 +158,17 @@ namespace MobileFlat.ViewModels
                 MosOblEircText = "Загрузка...";
                 GlobusText = "Загрузка...";
 
-                if (!Config.IsSet)
+                if (!await Config.IsSetAsync())
                 {
                     MosOblEircText = "Нет учётных данных";
                     GlobusText = "Нет учётных данных";
                     return false;
                 }
 
-                _model = await _webService.GetModelAsync();
+                if (await _webService.LoadAsync(false) != Status.Loaded)
+                    return false;
+
+                _model = _webService.Model;
                 if (_model == null)
                 {
                     MosOblEircText = "Ошибка";
@@ -182,12 +187,15 @@ namespace MobileFlat.ViewModels
                 BathroomHotWaterOldMeter = _model.Meters.BathroomHotWaterMeter.ToString();
                 ElectricityOldMeter = _model.Meters.ElectricityMeter.ToString();
 
-                var oldCanPassMeters = CanPassMeters;
-                CanPassWaterMeters = _webService.CanPassWaterMeters;
-                CanPassElectricityMeter = _webService.CanPassElectricityMeter;
-                // Enable button "Передать показания" if value changed
-                if (oldCanPassMeters != CanPassMeters)
-                    PassMetersCommand.ChangeCanExecute();
+                if (UseMeters)
+                {
+                    var oldCanPassMeters = CanPassMeters;
+                    CanPassWaterMeters = _webService.CanPassWaterMeters;
+                    CanPassElectricityMeter = _webService.CanPassElectricityMeter;
+                    // Enable button "Передать показания" if value changed
+                    if (oldCanPassMeters != CanPassMeters)
+                        PassMetersCommand.ChangeCanExecute();
+                }
 
                 return true;
             }
@@ -199,6 +207,8 @@ namespace MobileFlat.ViewModels
 
         private async Task<bool> PassMetersAsync()
         {
+            if (!UseMeters)
+                return false;
             if (!CanPassMeters)
             {
                 await _messenger.ShowErrorAsync("Ещё не время передавать показания");

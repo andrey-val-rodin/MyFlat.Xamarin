@@ -15,7 +15,7 @@ namespace MobileFlat.Services
     public class MosOblEircService
     {
         private readonly IMessenger _messenger;
-        private readonly HttpClient _httpClient = new HttpClient();
+        private readonly HttpClient _httpClient;
         private string _sessionId;
         private int _accountId;
         private int _abonentId;
@@ -31,6 +31,11 @@ namespace MobileFlat.Services
         public MosOblEircService(IMessenger messenger)
         {
             _messenger = messenger;
+            var handler = new HttpClientHandler()
+            {
+                AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate
+            };
+            _httpClient = new HttpClient(handler);
         }
 
         public async Task<bool> AuthorizeAsync(string login, string password)
@@ -47,7 +52,7 @@ namespace MobileFlat.Services
             var response = await SendAsync(request);
             if (response?.StatusCode != HttpStatusCode.OK)
             {
-                await _messenger.ShowErrorAsync(
+                await ShowErrorAsync(
                     $"МосОблЕирц вернул код ошибки {response?.StatusCode.ToString()}");
                 return false;
             }
@@ -57,7 +62,7 @@ namespace MobileFlat.Services
             var data = result?.Data?.FirstOrDefault();
             if (data == null || data.Nm_result != "Ошибок нет")
             {
-                await _messenger.ShowErrorAsync(string.IsNullOrEmpty(data?.Nm_result)
+                await ShowErrorAsync(string.IsNullOrEmpty(data?.Nm_result)
                     ? "МосОблЕирц: ошибка авторизации"
                     : "МосОблЕирц: " + data?.Nm_result);
                 return false;
@@ -70,7 +75,13 @@ namespace MobileFlat.Services
             return IsAuthorized;
         }
 
-        private T Deserialize<T>(string source) where T: class
+        private async Task ShowErrorAsync(string errorMessage)
+        {
+            if (_messenger != null)
+                await _messenger.ShowErrorAsync(errorMessage);
+        }
+
+        private T Deserialize<T>(string source) where T : class
         {
             if (string.IsNullOrEmpty(source))
                 return null;
@@ -83,7 +94,7 @@ namespace MobileFlat.Services
                 return null;
             }
         }
-		
+
         private async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request)
         {
             HttpResponseMessage response = null;
@@ -93,7 +104,7 @@ namespace MobileFlat.Services
             }
             catch (Exception e)
             {
-                await _messenger.ShowErrorAsync(e.Message);
+                await ShowErrorAsync(e.Message);
             }
 
             return response;
@@ -140,7 +151,7 @@ namespace MobileFlat.Services
             var response = await SendAsync(request);
             if (response?.StatusCode != HttpStatusCode.OK)
             {
-                await _messenger.ShowErrorAsync(
+                await ShowErrorAsync(
                     $"МосОблЕирц вернул код ошибки {response?.StatusCode.ToString()}");
                 return false;
             }
@@ -150,7 +161,7 @@ namespace MobileFlat.Services
             var data = result?.Data?.FirstOrDefault();
             if (!result.Success || data == null)
             {
-                await _messenger.ShowErrorAsync(
+                await ShowErrorAsync(
                     $"МосОблЕирц: ошибка при получении данных учётной записи");
                 return false;
             }
@@ -159,7 +170,7 @@ namespace MobileFlat.Services
             var abonent = Deserialize<AbonentDto>(data.Vl_provider);
             if (abonent == null)
             {
-                await _messenger.ShowErrorAsync(
+                await ShowErrorAsync(
                     $"МосОблЕирц: ошибка при получении данных учётной записи");
                 return false;
             }
@@ -181,7 +192,7 @@ namespace MobileFlat.Services
             var response = await SendAsync(request);
             if (response?.StatusCode != HttpStatusCode.OK)
             {
-                await _messenger.ShowErrorAsync(
+                await ShowErrorAsync(
                     $"МосОблЕирц вернул код ошибки {response?.StatusCode.ToString()}");
                 return false;
             }
@@ -191,7 +202,7 @@ namespace MobileFlat.Services
             var data = result?.Data?.FirstOrDefault();
             if (data == null || data.Nm_result != "Ошибок нет")
             {
-                await _messenger.ShowErrorAsync(string.IsNullOrEmpty(data?.Nm_result)
+                await ShowErrorAsync(string.IsNullOrEmpty(data?.Nm_result)
                     ? "МосОблЕирц: ошибка при выходе из кабинета"
                     : "МосОблЕирц: " + data?.Nm_result);
                 return false;
@@ -214,7 +225,7 @@ namespace MobileFlat.Services
             var response = await SendAsync(request);
             if (response?.StatusCode != HttpStatusCode.OK)
             {
-                await _messenger.ShowErrorAsync(
+                await ShowErrorAsync(
                     $"МосОблЕирц вернул код ошибки {response?.StatusCode.ToString()}");
                 return null;
             }
@@ -223,14 +234,14 @@ namespace MobileFlat.Services
             var result = Deserialize<BalanceDto>(content);
             if (result == null || !result.Success)
             {
-                await _messenger.ShowErrorAsync("Ошибка при попытке получить баланс из МосОблЕирц");
+                await ShowErrorAsync("Ошибка при попытке получить баланс из МосОблЕирц");
                 return null;
             }
 
             var child = result.Data?.FirstOrDefault();
             if (child == null || string.IsNullOrEmpty(child.Dt_period_balance))
             {
-                await _messenger.ShowErrorAsync(
+                await ShowErrorAsync(
                     "Ошибка при попытке получить баланс из МосОблЕирц");
                 return null;
             }
@@ -253,16 +264,16 @@ namespace MobileFlat.Services
             var response = await SendAsync(request);
             if (response?.StatusCode != HttpStatusCode.OK)
             {
-                await _messenger.ShowErrorAsync(
+                await ShowErrorAsync(
                     $"МосОблЕирц вернул код ошибки {response?.StatusCode.ToString()}");
                 return null;
             }
 
             var content = await response.Content?.ReadAsStringAsync();
             var result = Deserialize<MeterDto>(content);
-            if (result?.Data?.Count == 0)
+            if (result?.Data == null || result.Data.Count == 0)
             {
-                await _messenger.ShowErrorAsync(
+                await ShowErrorAsync(
                     "Ошибка при попытке получить показания счётчиков из личного кабинета");
                 return null;
             }
@@ -284,7 +295,7 @@ namespace MobileFlat.Services
             var response = await SendAsync(request);
             if (response?.StatusCode != HttpStatusCode.OK)
             {
-                await _messenger.ShowErrorAsync(
+                await ShowErrorAsync(
                     $"МосОблЕирц вернул код ошибки {response?.StatusCode.ToString()}");
                 return false;
             }
@@ -294,7 +305,7 @@ namespace MobileFlat.Services
             if (result?.Success != true ||
                 result.Data?.FirstOrDefault()?.Nm_result != "Показания успешно переданы")
             {
-                await _messenger.ShowErrorAsync(
+                await ShowErrorAsync(
                     $"Ошибка во время передачи показаний в МосОблЕирц");
                 return false;
             }

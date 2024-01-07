@@ -1,116 +1,187 @@
-﻿using System;
-using System.Threading;
+﻿using MobileFlat.Models;
+using System;
 using System.Threading.Tasks;
 using Xamarin.Essentials;
 
 namespace MobileFlat.Common
 {
-    static public class Config
+    public static class Config
     {
-        private static readonly SemaphoreSlim _mutex = new SemaphoreSlim(1);
-        private static string _mosOblEircUser;
-        private static string _mosOblEircPassword;
-        private static string _globusUser;
-        private static string _globusPassword;
-
-        public static string MosOblEircUser
+        #region Preferences
+        public static Status GetStatus(Status defaultValue)
         {
-            get
-            {
-                _mutex.Wait();
-                var result = _mosOblEircUser;
-                _mutex.Release();
-                return result;
-            }
+            return (Status)Preferences.Get("Status", (int)defaultValue);
         }
 
-        public static string MosOblEircPassword
+        public static void SetStatus(Status value)
         {
-            get
-            {
-                _mutex.Wait();
-                var result = _mosOblEircPassword;
-                _mutex.Release();
-                return result;
-            }
+            Preferences.Set("Status", (int)value);
         }
 
-        public static string GlobusUser
+        public static DateTime GetTimestamp(DateTime defaultValue)
         {
-            get
-            {
-                _mutex.Wait();
-                var result = _globusUser;
-                _mutex.Release();
-                return result;
-            }
+            return Preferences.Get("Timestamp", defaultValue);
         }
 
-        public static string GlobusPassword
+        public static void SetTimestamp(DateTime value)
         {
-            get
-            {
-                _mutex.Wait();
-                var result = _globusPassword;
-                _mutex.Release();
-                return result;
-            }
+            Preferences.Set("Timestamp", value);
         }
 
-
-        public static bool IsSet
+        public static bool GetModelIsSet(bool defaultValue)
         {
-            get
-            {
-                _mutex.Wait();
-                var result =
-                    !string.IsNullOrWhiteSpace(_mosOblEircUser) &&
-                    !string.IsNullOrWhiteSpace(_mosOblEircPassword) &&
-                    !string.IsNullOrWhiteSpace(_globusUser) &&
-                    !string.IsNullOrWhiteSpace(_globusPassword);
-                _mutex.Release();
-                return result;
-            }
+            return Preferences.Get("ModelIsSet", defaultValue);
         }
 
-        public static async Task SaveAsync(Models.Settings model)
+        public static void SetModelIsSet(bool value)
         {
-            if (model == null)
-                throw new ArgumentNullException(nameof(model));
-
-            await _mutex.WaitAsync();
-            try
-            {
-                _mosOblEircUser = model.MosOblEircUser;
-                _mosOblEircPassword = model.MosOblEircPassword;
-                _globusUser = model.GlobusUser;
-                _globusPassword = model.GlobusPassword;
-
-                await SecureStorage.SetAsync("MosOblEircUser", _mosOblEircUser);
-                await SecureStorage.SetAsync("MosOblEircPassword", _mosOblEircPassword);
-                await SecureStorage.SetAsync("GlobusUser", _globusUser);
-                await SecureStorage.SetAsync("GlobusPassword", _globusPassword);
-            }
-            finally
-            {
-                _mutex.Release();
-            }
+            Preferences.Set("ModelIsSet", value);
         }
 
-        public static async Task LoadAsync()
+        public static decimal GetMosOblEircBalance(decimal defaultValue)
         {
-            await _mutex.WaitAsync();
-            try
-            {
-                _mosOblEircUser = await SecureStorage.GetAsync("MosOblEircUser");
-                _mosOblEircPassword = await SecureStorage.GetAsync("MosOblEircPassword");
-                _globusUser = await SecureStorage.GetAsync("GlobusUser");
-                _globusPassword = await SecureStorage.GetAsync("GlobusPassword");
-            }
-            finally
-            {
-                _mutex.Release();
-            }
+            return decimal.TryParse(Preferences.Get("MosOblEircBalance", defaultValue.ToString()), out decimal balance)
+                ? balance
+                : defaultValue;
         }
+
+        public static void SetMosOblEircBalance(decimal value)
+        {
+            Preferences.Set("MosOblEircBalance", value.ToString());
+        }
+
+        public static decimal GetGlobusBalance(decimal defaultValue)
+        {
+            return decimal.TryParse(Preferences.Get("GlobusBalance", defaultValue.ToString()), out decimal balance)
+                ? balance
+                : defaultValue;
+        }
+
+        public static void SetGlobusBalance(decimal value)
+        {
+            Preferences.Set("GlobusBalance", value.ToString());
+        }
+
+        public static int GetKitchenColdWaterMeter(int defaultValue)
+        {
+            return Preferences.Get("KitchenColdWaterMeter", defaultValue);
+        }
+
+        public static void SetKitchenColdWaterMeter(int value)
+        {
+            Preferences.Set("KitchenColdWaterMeter", value);
+        }
+
+        public static int GetKitchenHotWaterMeter(int defaultValue)
+        {
+            return Preferences.Get("KitchenHotWaterMeter", defaultValue);
+        }
+
+        public static void SetKitchenHotWaterMeter(int value)
+        {
+            Preferences.Set("KitchenHotWaterMeter", value);
+        }
+
+        public static int GetBathroomColdWaterMeter(int defaultValue)
+        {
+            return Preferences.Get("BathroomColdWaterMeter", defaultValue);
+        }
+
+        public static void SetBathroomColdWaterMeter(int value)
+        {
+            Preferences.Set("BathroomColdWaterMeter", value);
+        }
+
+        public static int GetBathroomHotWaterMeter(int defaultValue)
+        {
+            return Preferences.Get("BathroomHotWaterMeter", defaultValue);
+        }
+
+        public static void SetBathroomHotWaterMeter(int value)
+        {
+            Preferences.Set("BathroomHotWaterMeter", value);
+        }
+
+        public static int GetElectricityMeter(int defaultValue)
+        {
+            return Preferences.Get("ElectricityMeter", defaultValue);
+        }
+
+        public static void SetElectricityMeter(int value)
+        {
+            Preferences.Set("ElectricityMeter", value);
+        }
+
+        public static decimal GetLastGlobusBalance(decimal defaultValue)
+        {
+            return decimal.TryParse(Preferences.Get("LastGlobusBalance", defaultValue.ToString()), out decimal balance)
+                ? balance
+                : defaultValue;
+        }
+
+        public static void SetLastGlobusBalance(decimal value)
+        {
+            Preferences.Set("LastGlobusBalance", value.ToString());
+        }
+        #endregion
+
+        #region Secure settings
+        public static async Task<string> GetMosOblEircUserAsync()
+        {
+            return await SecureStorage.GetAsync("MosOblEircUser");
+        }
+
+        public static async Task<string> GetMosOblEircPasswordAsync()
+        {
+            return await SecureStorage.GetAsync("MosOblEircPassword");
+        }
+
+        public static async Task<string> GetGlobusUserAsync()
+        {
+            return await SecureStorage.GetAsync("GlobusUser");
+        }
+
+        public static async Task<string> GetGlobusPasswordAsync()
+        {
+            return await SecureStorage.GetAsync("GlobusPassword");
+        }
+
+        public static async Task SetMosOblEircUserAsync(string value)
+        {
+            await SecureStorage.SetAsync("MosOblEircUser", value);
+        }
+
+        public static async Task SetMosOblEircPasswordAsync(string value)
+        {
+            await SecureStorage.SetAsync("MosOblEircPassword", value);
+        }
+
+        public static async Task SetGlobusUserAsync(string value)
+        {
+            await SecureStorage.SetAsync("GlobusUser", value);
+        }
+
+        public static async Task SetGlobusPasswordAsync(string value)
+        {
+            await SecureStorage.SetAsync("GlobusPassword", value);
+        }
+
+        public static async Task<bool> IsSetAsync()
+        {
+            return
+                !string.IsNullOrWhiteSpace(await GetMosOblEircUserAsync()) &&
+                !string.IsNullOrWhiteSpace(await GetMosOblEircPasswordAsync()) &&
+                !string.IsNullOrWhiteSpace(await GetGlobusUserAsync()) &&
+                !string.IsNullOrWhiteSpace(await GetGlobusPasswordAsync());
+        }
+
+        public static async Task SaveAsync(Settings model)
+        {
+            await SetMosOblEircUserAsync(model.MosOblEircUser);
+            await SetMosOblEircPasswordAsync(model.MosOblEircPassword);
+            await SetGlobusUserAsync(model.GlobusUser);
+            await SetGlobusPasswordAsync(model.GlobusPassword);
+        }
+        #endregion
     }
 }

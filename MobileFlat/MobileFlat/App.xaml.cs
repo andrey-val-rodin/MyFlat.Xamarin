@@ -17,12 +17,8 @@ namespace MobileFlat
         protected override async void OnStart()
         {
             var mainPage = Shell.Current.CurrentPage as MainPage;
-            var mainModel = mainPage?.viewModel;
-            if (mainModel == null)
-                throw new InvalidOperationException("Missing MainPage or MainModel");
-
-            await Config.LoadAsync();
-            if (!Config.IsSet)
+            var mainModel = (mainPage?.viewModel) ?? throw new InvalidOperationException("Missing MainPage or MainModel");
+            if (!await Config.IsSetAsync())
             {
                 mainModel.MosOblEircText = "Нет учётных данных";
                 mainModel.GlobusText = "Нет учётных данных";
