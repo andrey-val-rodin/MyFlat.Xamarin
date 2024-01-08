@@ -112,16 +112,26 @@ namespace MobileFlat.Common
             Preferences.Set("ElectricityMeter", value);
         }
 
-        public static decimal GetLastGlobusBalance(decimal defaultValue)
+        public static decimal GetLastGlobusBalance()
         {
-            return decimal.TryParse(Preferences.Get("LastGlobusBalance", defaultValue.ToString()), out decimal balance)
+            return decimal.TryParse(Preferences.Get("LastGlobusBalance", 0.ToString()), out decimal balance)
                 ? balance
-                : defaultValue;
+                : 0;
         }
 
         public static void SetLastGlobusBalance(decimal value)
         {
             Preferences.Set("LastGlobusBalance", value.ToString());
+        }
+
+        public static int GetGlobusBalanceAccessCount()
+        {
+            return Preferences.Get("GlobusBalanceAccessCount", 0);
+        }
+
+        public static void SetGlobusBalanceAccessCount(int value)
+        {
+            Preferences.Set("GlobusBalanceAccessCount", value);
         }
         #endregion
 

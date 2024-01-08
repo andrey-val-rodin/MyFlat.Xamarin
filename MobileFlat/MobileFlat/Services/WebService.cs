@@ -68,7 +68,7 @@ namespace MobileFlat.Services
             get
             {
                 var now = DateTime.Now;
-                return now.Hour >= 9 && now.Hour <= 18;
+                return now.Hour >= 10 && now.Hour <= 18;
             }
         }
 
@@ -200,11 +200,27 @@ namespace MobileFlat.Services
                 };
 
                 // Globus site keeps invoice many days and even weeks
-                // App will notify the user only one time
-                if (model.GlobusBalance != 0 && model.GlobusBalance == Config.GetLastGlobusBalance(0))
-                    model.GlobusBalance = 0;
+                // App will notify the user only two times
+                if (model.GlobusBalance != 0)
+                {
+                    if (model.GlobusBalance == Config.GetLastGlobusBalance())
+                    {
+                        int attemptCount = Config.GetGlobusBalanceAccessCount() + 1;
+                        if (attemptCount > 1)
+                            model.GlobusBalance = 0;
+                        Config.SetGlobusBalanceAccessCount(attemptCount);
+                    }
+                    else
+                    {
+                        Config.SetLastGlobusBalance(model.GlobusBalance);
+                        Config.SetGlobusBalanceAccessCount(0);
+                    }
+                }
                 else
-                    Config.SetLastGlobusBalance(model.GlobusBalance);
+                {
+                    Config.SetLastGlobusBalance(0);
+                    Config.SetGlobusBalanceAccessCount(0);
+                }
 
                 if (UseMeters)
                 {
