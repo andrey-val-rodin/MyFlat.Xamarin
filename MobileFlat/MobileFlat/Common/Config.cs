@@ -1,5 +1,7 @@
-﻿using MobileFlat.Models;
+﻿using MobileFlat.Dto;
+using MobileFlat.Models;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Xamarin.Essentials;
 
@@ -62,54 +64,44 @@ namespace MobileFlat.Common
             Preferences.Set("GlobusBalance", value.ToString());
         }
 
-        public static int GetKitchenColdWaterMeter(int defaultValue)
+        public static void SaveMeters(IList<MeterChildDto> meters)
         {
-            return Preferences.Get("KitchenColdWaterMeter", defaultValue);
+            if (meters == null)
+                throw new ArgumentNullException(nameof(meters));
+
+            Preferences.Set("MeterCount", meters.Count);
+            for (int i = 0; i < meters.Count; i++)
+            {
+                var meter = meters[i];
+                var prefix = $"Meter{i}";
+
+                Preferences.Set($"{prefix}Id", meter.Id_counter);
+                Preferences.Set($"{prefix}Name", meter.Nm_counter);
+                Preferences.Set($"{prefix}Value", meter.Vl_last_indication);
+                Preferences.Set($"{prefix}Date", meter.Dt_last_indication);
+            }
         }
 
-        public static void SetKitchenColdWaterMeter(int value)
+        public static IList<MeterChildDto> LoadMeters()
         {
-            Preferences.Set("KitchenColdWaterMeter", value);
-        }
+            int count = Preferences.Get("MeterCount", 0);
+            if (count == 0)
+                return null;
 
-        public static int GetKitchenHotWaterMeter(int defaultValue)
-        {
-            return Preferences.Get("KitchenHotWaterMeter", defaultValue);
-        }
+            var result = new List<MeterChildDto>();
+            for (int i = 0; i < count; i++)
+            {
+                var meter = new MeterChildDto();
+                var prefix = $"Meter{i}";
 
-        public static void SetKitchenHotWaterMeter(int value)
-        {
-            Preferences.Set("KitchenHotWaterMeter", value);
-        }
+                meter.Id_counter = Preferences.Get($"{prefix}Id", 0);
+                meter.Nm_counter = Preferences.Get($"{prefix}Name", "");
+                meter.Vl_last_indication = Preferences.Get($"{prefix}Value", 0);
+                meter.Dt_last_indication = Preferences.Get($"{prefix}Date", "");
+                result.Add(meter);
+            }
 
-        public static int GetBathroomColdWaterMeter(int defaultValue)
-        {
-            return Preferences.Get("BathroomColdWaterMeter", defaultValue);
-        }
-
-        public static void SetBathroomColdWaterMeter(int value)
-        {
-            Preferences.Set("BathroomColdWaterMeter", value);
-        }
-
-        public static int GetBathroomHotWaterMeter(int defaultValue)
-        {
-            return Preferences.Get("BathroomHotWaterMeter", defaultValue);
-        }
-
-        public static void SetBathroomHotWaterMeter(int value)
-        {
-            Preferences.Set("BathroomHotWaterMeter", value);
-        }
-
-        public static int GetElectricityMeter(int defaultValue)
-        {
-            return Preferences.Get("ElectricityMeter", defaultValue);
-        }
-
-        public static void SetElectricityMeter(int value)
-        {
-            Preferences.Set("ElectricityMeter", value);
+            return result;
         }
 
         public static decimal GetLastGlobusBalance()

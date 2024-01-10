@@ -79,7 +79,7 @@ namespace MobileFlat.Droid
 
         class Messenger : IMessenger
         {
-            public string ErrorMessage { get; set; }
+            public string ErrorMessage { get; set; } = string.Empty;
 
             public Task ShowErrorAsync(string message)
             {

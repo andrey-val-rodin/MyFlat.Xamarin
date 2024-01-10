@@ -11,6 +11,8 @@ namespace MobileFlat.Services
 {
     public class WebService
     {
+        private readonly static DateTime _defaultTime = new DateTime(100, 1, 1);
+
         private readonly IMessenger _messenger;
         private readonly MosOblEircService _mosOblEircService;
         private readonly GlobusService _globusService;
@@ -30,7 +32,7 @@ namespace MobileFlat.Services
 
         public Main Model { get; private set; }
 
-        public DateTime Timestamp { get; private set; }
+        public DateTime Timestamp { get; private set; } = _defaultTime;
 
         public Status Status { get; private set; }
 
@@ -68,7 +70,7 @@ namespace MobileFlat.Services
             get
             {
                 var now = DateTime.Now;
-                return now.Hour >= 10 && now.Hour <= 18;
+                return now.Hour >= 10 && now.Hour <= 20;
             }
         }
 
@@ -192,7 +194,7 @@ namespace MobileFlat.Services
                 // GlobusService keeps current balance; we can logoff
                 await _globusService.LogoffAsync();
 
-                var model = new Main
+                Model = new Main
                 {
                     MosOblEircBalance = tuple.Item2,
                     GlobusBalance = _globusService.Balance,
@@ -200,19 +202,19 @@ namespace MobileFlat.Services
                 };
 
                 // Globus site keeps invoice many days and even weeks
-                // App will notify the user only two times
-                if (model.GlobusBalance != 0)
+                // App will notify the user only three times
+                if (Model.GlobusBalance != 0)
                 {
-                    if (model.GlobusBalance == Config.GetLastGlobusBalance())
+                    if (Model.GlobusBalance == Config.GetLastGlobusBalance())
                     {
                         int attemptCount = Config.GetGlobusBalanceAccessCount() + 1;
-                        if (attemptCount > 1)
-                            model.GlobusBalance = 0;
+                        if (attemptCount > 2)
+                            Model.GlobusBalance = 0;
                         Config.SetGlobusBalanceAccessCount(attemptCount);
                     }
                     else
                     {
-                        Config.SetLastGlobusBalance(model.GlobusBalance);
+                        Config.SetLastGlobusBalance(Model.GlobusBalance);
                         Config.SetGlobusBalanceAccessCount(0);
                     }
                 }
@@ -222,17 +224,7 @@ namespace MobileFlat.Services
                     Config.SetGlobusBalanceAccessCount(0);
                 }
 
-                if (UseMeters)
-                {
-                    model.MosOblEircBalance = tuple.Item2;
-                    model.Meters.KitchenColdWaterMeter = KitchenColdWater.Vl_last_indication;
-                    model.Meters.KitchenHotWaterMeter = KitchenHotWater.Vl_last_indication;
-                    model.Meters.BathroomColdWaterMeter = BathroomColdWater.Vl_last_indication;
-                    model.Meters.BathroomHotWaterMeter = BathroomHotWater.Vl_last_indication;
-                    model.Meters.ElectricityMeter = Electricity.Vl_last_indication;
-                }
-
-                Model = model;
+                SetModelMeterValues();
                 Status = Status.Loaded;
                 Timestamp = DateTime.Now;
                 SaveState();
@@ -247,6 +239,23 @@ namespace MobileFlat.Services
             {
                 _semaphore.Release();
             }
+        }
+
+        private void SetModelMeterValues()
+        {
+            if (!UseMeters)
+                return;
+
+            if (Model == null)
+                throw new InvalidOperationException("Model is null");
+            if (_meters == null)
+                throw new InvalidOperationException("_meters is null");
+
+            Model.Meters.KitchenColdWaterMeter = KitchenColdWater.Vl_last_indication;
+            Model.Meters.KitchenHotWaterMeter = KitchenHotWater.Vl_last_indication;
+            Model.Meters.BathroomColdWaterMeter = BathroomColdWater.Vl_last_indication;
+            Model.Meters.BathroomHotWaterMeter = BathroomHotWater.Vl_last_indication;
+            Model.Meters.ElectricityMeter = Electricity.Vl_last_indication;
         }
 
         private async Task SetErrorAsync(string errorMessage)
@@ -333,46 +342,58 @@ namespace MobileFlat.Services
             return true;
         }
 
-        private void LoadState()
+        private bool LoadState()
         {
-            Status = Config.GetStatus(Status.NotLoaded);
-            Timestamp = Config.GetTimestamp(new DateTime(100, 1, 1));
-            if (Config.GetModelIsSet(false))
+            bool result = false;
+            try
             {
-                Model = new Main
-                {
-                    MosOblEircBalance = Config.GetMosOblEircBalance(0),
-                    GlobusBalance = Config.GetGlobusBalance(0),
-                    Meters = new Meters()
-                };
+                Status = Config.GetStatus(Status.NotLoaded);
+                Timestamp = Config.GetTimestamp(_defaultTime);
 
-                Model.Meters.KitchenColdWaterMeter = Config.GetKitchenColdWaterMeter(0);
-                Model.Meters.BathroomColdWaterMeter = Config.GetBathroomColdWaterMeter(0);
-                Model.Meters.BathroomHotWaterMeter = Config.GetBathroomHotWaterMeter(0);
-                Model.Meters.ElectricityMeter = Config.GetElectricityMeter(0);
+                if (Config.GetModelIsSet(false))
+                {
+                    Model = new Main
+                    {
+                        MosOblEircBalance = Config.GetMosOblEircBalance(0),
+                        GlobusBalance = Config.GetGlobusBalance(0),
+                        Meters = new Meters()
+                    };
+
+                    var meters = Config.LoadMeters();
+                    if (meters == null)
+                        return false;
+
+                    _meters = meters;
+                    SetModelMeterValues();
+                    result = true;
+                }
+                else
+                {
+                    result = false;
+                }
             }
-            else
+            finally
             {
-                Status = Status.NotLoaded;
-                Model = null;
+                if (!result)
+                {
+                    Model = null;
+                    Status = Status.NotLoaded;
+                    Timestamp = _defaultTime;
+                }
             }
+
+            return result;
         }
 
         private void SaveState()
         {
             Config.SetStatus(Status);
             Config.SetTimestamp(Timestamp);
-            if (Model != null)
+            if (Model != null && _meters != null)
             {
                 Config.SetMosOblEircBalance(Model.MosOblEircBalance);
                 Config.SetGlobusBalance(Model.GlobusBalance);
-
-                Config.SetKitchenColdWaterMeter(Model.Meters.KitchenColdWaterMeter);
-                Config.SetKitchenHotWaterMeter(Model.Meters.KitchenHotWaterMeter);
-                Config.SetBathroomColdWaterMeter(Model.Meters.BathroomColdWaterMeter);
-                Config.SetBathroomHotWaterMeter(Model.Meters.BathroomHotWaterMeter);
-                Config.SetElectricityMeter(Model.Meters.ElectricityMeter);
-
+                Config.SaveMeters(_meters);
                 Config.SetModelIsSet(true);
             }
             else

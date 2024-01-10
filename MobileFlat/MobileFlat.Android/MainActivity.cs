@@ -3,7 +3,7 @@ using Android.Content.PM;
 using Android.OS;
 using Android.Runtime;
 using AndroidX.Work;
-using Java.Util.Concurrent;
+using System;
 
 namespace MobileFlat.Droid
 {
@@ -18,7 +18,7 @@ namespace MobileFlat.Droid
             global::Xamarin.Forms.Forms.Init(this, savedInstanceState);
             LoadApplication(new App());
 
-            var workRequest = new PeriodicWorkRequest.Builder(typeof(MobileFlatWorker), 2, TimeUnit.Hours)
+            var workRequest = new PeriodicWorkRequest.Builder(typeof(MobileFlatWorker), TimeSpan.FromHours(2))
                 .AddTag(MobileFlatWorker.TAG)
                 .Build();
             WorkManager.GetInstance(Application.Context).EnqueueUniquePeriodicWork(
