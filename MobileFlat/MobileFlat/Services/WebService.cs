@@ -11,8 +11,6 @@ namespace MobileFlat.Services
 {
     public class WebService
     {
-        private readonly static DateTime _defaultTime = new DateTime(100, 1, 1);
-
         private readonly IMessenger _messenger;
         private readonly MosOblEircService _mosOblEircService;
         private readonly GlobusService _globusService;
@@ -32,7 +30,7 @@ namespace MobileFlat.Services
 
         public Main Model { get; private set; }
 
-        public DateTime Timestamp { get; private set; } = _defaultTime;
+        public DateTime Timestamp { get; private set; } = DateTime.MinValue;
 
         public Status Status { get; private set; }
 
@@ -55,22 +53,19 @@ namespace MobileFlat.Services
                 if (!IsSuitableTimeToLoad)
                     return false;
 
-                return Status switch
-                {
-                    Status.NotLoaded => true,
-                    Status.Loading => false,
-                    Status.Loaded => Timestamp.Day != DateTime.Now.Day,
-                    _ => true
-                };
+                if (Status != Status.Loaded)
+                    return true;
+
+                return Timestamp.Date != DateTime.Now.Date;
             }
         }
 
-        protected bool IsSuitableTimeToLoad
+        public bool IsSuitableTimeToLoad
         {
             get
             {
-                var now = DateTime.Now;
-                return now.Hour >= 10 && now.Hour <= 20;
+                var hour = DateTime.Now.Hour;
+                return hour >= 10 && hour <= 20;
             }
         }
 
@@ -134,11 +129,11 @@ namespace MobileFlat.Services
                         return Status.Skipped;
                 }
 
+                Status = Status.NotLoaded;
+                Timestamp = DateTime.MinValue;
+
                 if (!await Config.IsSetAsync())
-                {
-                    Status = Status.NotLoaded;
                     return Status;
-                }
 
                 // МосОблЕИРЦ
                 var user = await Config.GetMosOblEircUserAsync();
@@ -348,7 +343,7 @@ namespace MobileFlat.Services
             try
             {
                 Status = Config.GetStatus(Status.NotLoaded);
-                Timestamp = Config.GetTimestamp(_defaultTime);
+                Timestamp = Config.GetTimestamp(DateTime.MinValue);
 
                 if (Config.GetModelIsSet(false))
                 {
@@ -368,9 +363,7 @@ namespace MobileFlat.Services
                     result = true;
                 }
                 else
-                {
                     result = false;
-                }
             }
             finally
             {
@@ -378,7 +371,7 @@ namespace MobileFlat.Services
                 {
                     Model = null;
                     Status = Status.NotLoaded;
-                    Timestamp = _defaultTime;
+                    Timestamp = DateTime.MinValue;
                 }
             }
 
@@ -389,6 +382,7 @@ namespace MobileFlat.Services
         {
             Config.SetStatus(Status);
             Config.SetTimestamp(Timestamp);
+
             if (Model != null && _meters != null)
             {
                 Config.SetMosOblEircBalance(Model.MosOblEircBalance);
