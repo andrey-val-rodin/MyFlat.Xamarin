@@ -49,11 +49,7 @@ namespace MobileFlat.Droid
 
             var status = await service.LoadAsync(true);
             if (status != Models.Status.Loaded)
-            {
-                if (status == Models.Status.Error)
-                    SendNotification("Ошибка", messenger.ErrorMessage);
                 return;
-            }
 
             var model = service.Model;
 
