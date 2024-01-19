@@ -263,10 +263,10 @@ namespace MobileFlat.Services
 
         public async Task<bool> SetMetersAsync(Meters meters)
         {
-            if (meters == null)
-                throw new ArgumentNullException(nameof(meters));
             if (!UseMeters)
                 return false;
+            if (meters == null)
+                throw new ArgumentNullException(nameof(meters));
 
             if (meters.KitchenColdWaterMeter == 0 &&
                 meters.KitchenHotWaterMeter == 0 &&
@@ -344,21 +344,26 @@ namespace MobileFlat.Services
             {
                 Status = Config.GetStatus(Status.NotLoaded);
                 Timestamp = Config.GetTimestamp(DateTime.MinValue);
+                Model = null;
+                _meters = null;
 
                 if (Config.GetModelIsSet(false))
                 {
                     Model = new Main
                     {
                         MosOblEircBalance = Config.GetMosOblEircBalance(0),
-                        GlobusBalance = Config.GetGlobusBalance(0),
-                        Meters = new Meters()
+                        GlobusBalance = Config.GetGlobusBalance(0)
                     };
+
+                    if (!UseMeters)
+                        return true;
 
                     var meters = Config.LoadMeters();
                     if (meters == null)
                         return false;
 
                     _meters = meters;
+                    Model.Meters = new Meters();
                     SetModelMeterValues();
                     result = true;
                 }
@@ -383,11 +388,12 @@ namespace MobileFlat.Services
             Config.SetStatus(Status);
             Config.SetTimestamp(Timestamp);
 
-            if (Model != null && _meters != null)
+            if (Model != null)
             {
                 Config.SetMosOblEircBalance(Model.MosOblEircBalance);
                 Config.SetGlobusBalance(Model.GlobusBalance);
-                Config.SaveMeters(_meters);
+                if (UseMeters)
+                    Config.SaveMeters(_meters);
                 Config.SetModelIsSet(true);
             }
             else

@@ -181,14 +181,14 @@ namespace MobileFlat.ViewModels
                 GlobusText = _model.GlobusBalance == 0 ?
                     "Оплачено" : $"Выставлен счёт на {_model.GlobusBalance} руб";
 
-                KitchenColdWaterOldMeter = _model.Meters.KitchenColdWaterMeter.ToString();
-                KitchenHotWaterOldMeter = _model.Meters.KitchenHotWaterMeter.ToString();
-                BathroomColdWaterOldMeter = _model.Meters.BathroomColdWaterMeter.ToString();
-                BathroomHotWaterOldMeter = _model.Meters.BathroomHotWaterMeter.ToString();
-                ElectricityOldMeter = _model.Meters.ElectricityMeter.ToString();
-
                 if (UseMeters)
                 {
+                    KitchenColdWaterOldMeter = _model.Meters.KitchenColdWaterMeter.ToString();
+                    KitchenHotWaterOldMeter = _model.Meters.KitchenHotWaterMeter.ToString();
+                    BathroomColdWaterOldMeter = _model.Meters.BathroomColdWaterMeter.ToString();
+                    BathroomHotWaterOldMeter = _model.Meters.BathroomHotWaterMeter.ToString();
+                    ElectricityOldMeter = _model.Meters.ElectricityMeter.ToString();
+
                     var oldCanPassMeters = CanPassMeters;
                     CanPassWaterMeters = _webService.CanPassWaterMeters;
                     CanPassElectricityMeter = _webService.CanPassElectricityMeter;
