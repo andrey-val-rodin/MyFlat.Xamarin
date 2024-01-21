@@ -355,16 +355,17 @@ namespace MobileFlat.Services
                         GlobusBalance = Config.GetGlobusBalance(0)
                     };
 
-                    if (!UseMeters)
-                        return true;
+                    if (UseMeters)
+                    {
+                        var meters = Config.LoadMeters();
+                        if (meters == null)
+                            return false;
 
-                    var meters = Config.LoadMeters();
-                    if (meters == null)
-                        return false;
+                        _meters = meters;
+                        Model.Meters = new Meters();
+                        SetModelMeterValues();
+                    }
 
-                    _meters = meters;
-                    Model.Meters = new Meters();
-                    SetModelMeterValues();
                     result = true;
                 }
                 else
