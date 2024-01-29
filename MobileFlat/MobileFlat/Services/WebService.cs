@@ -32,7 +32,7 @@ namespace MobileFlat.Services
 
         public DateTime Timestamp { get; private set; } = DateTime.MinValue;
 
-        public Status Status { get; private set; }
+        public Status Status { get; private set; } = Status.NotLoaded;
 
         public static bool UseMeters
         {
@@ -124,6 +124,9 @@ namespace MobileFlat.Services
             {
                 if (checkConditions)
                 {
+                    if (!IsSuitableTimeToLoad)
+                        return Status.Skipped;
+
                     LoadState();
                     if (!NeedToLoad)
                         return Status.Skipped;
