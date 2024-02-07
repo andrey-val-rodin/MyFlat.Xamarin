@@ -60,7 +60,7 @@ namespace MobileFlat.Services
             }
         }
 
-        public bool IsSuitableTimeToLoad
+        public static bool IsSuitableTimeToLoad
         {
             get
             {
