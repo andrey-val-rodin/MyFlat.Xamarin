@@ -1,11 +1,12 @@
-﻿using Android.Content;
+﻿using Android.App;
+using Android.Content;
 using Android.Util;
 using AndroidX.Concurrent.Futures;
 using AndroidX.Work;
 using Google.Common.Util.Concurrent;
-using Java.Lang;
 using MobileFlat.Common;
 using MobileFlat.Services;
+using System;
 using System.Threading.Tasks;
 
 namespace MobileFlat.Droid
@@ -25,7 +26,7 @@ namespace MobileFlat.Droid
             return CallbackToFutureAdapter.GetFuture(this);
         }
 
-        public Object AttachCompleter(CallbackToFutureAdapter.Completer p0)
+        public Java.Lang.Object AttachCompleter(CallbackToFutureAdapter.Completer p0)
         {
             Log.Debug(TAG, $"Executing.");
 
@@ -49,7 +50,29 @@ namespace MobileFlat.Droid
 
             var status = await service.LoadAsync(true);
             if (status != Models.Status.Loaded)
+            {
+                if (status == Models.Status.Skipped)
+                {
+                    // Do work tomorrow
+                    EnqueueWork(GetTomorrowTimeSpan());
+                }
+                else
+                {
+                    // Plan work soon
+                    if (WebService.IsSuitableTimeToLoad)
+                    {
+                        // Do work in an hour
+                        EnqueueWork(TimeSpan.FromHours(1));
+                    }
+                    else
+                    {
+                        // Do work tomorrow
+                        EnqueueWork(GetTomorrowTimeSpan());
+                    }
+                }
+
                 return;
+            }
 
             var model = service.Model;
 
@@ -65,12 +88,55 @@ namespace MobileFlat.Droid
                 if (service.CanPassElectricityMeter)
                     SendNotification("Пора вводить значения электросчётчика", string.Empty);
             }
+
+            // Do next work tomorrow
+            EnqueueWork(GetTomorrowTimeSpan());
         }
 
-        void SendNotification(string title, string message)
+        static void SendNotification(string title, string message)
         {
             AndroidNotificationManager notificationManager = AndroidNotificationManager.Instance ?? new AndroidNotificationManager();
             notificationManager.SendNotification(title, message);
+        }
+
+        public static void EnqueueWork(TimeSpan delay)
+        {
+            var workRequest = new OneTimeWorkRequest.Builder(typeof(MobileFlatWorker))
+                .AddTag(TAG)
+                .SetInitialDelay(delay)
+                .Build();
+            WorkManager.GetInstance(Application.Context).EnqueueUniqueWork(
+                    TAG, ExistingWorkPolicy.Replace, workRequest);
+        }
+
+        public static bool IsWorkScheduled()
+        {
+            WorkManager instance = WorkManager.GetInstance(Application.Context);
+            var statuses = instance.GetWorkInfosByTag(TAG);
+            try
+            {
+                bool running = false;
+                var workInfoList = statuses.Get() as Android.Runtime.JavaList;
+                foreach (WorkInfo workInfo in workInfoList)
+                {
+                    WorkInfo.State state = workInfo.GetState();
+                    running = state == WorkInfo.State.Running || state == WorkInfo.State.Enqueued;
+                }
+
+                return running;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public static TimeSpan GetTomorrowTimeSpan()
+        {
+            var now = DateTime.Now;
+            var tomorrow = now + TimeSpan.FromDays(1);
+            var time = new DateTime(tomorrow.Year, tomorrow.Month, tomorrow.Day, 10, 0, 0);
+            return time - now;
         }
 
         class Messenger : IMessenger

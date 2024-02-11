@@ -77,8 +77,11 @@ namespace MobileFlat.Droid
             Intent intent = new Intent(AndroidApp.Context, typeof(MainActivity));
             intent.PutExtra(TitleKey, title);
             intent.PutExtra(MessageKey, message);
-
-            PendingIntent pendingIntent = PendingIntent.GetActivity(AndroidApp.Context, pendingIntentId++, intent, PendingIntentFlags.UpdateCurrent);
+            var pendingIntentFlags = /*(Build.VERSION.SdkInt >= BuildVersionCodes.S)
+                            ? PendingIntentFlags.OneShot | PendingIntentFlags.Immutable
+                            : */PendingIntentFlags.OneShot;
+            PendingIntent pendingIntent = PendingIntent.GetActivity(
+                AndroidApp.Context, pendingIntentId++, intent, pendingIntentFlags);
 
             NotificationCompat.Builder builder = new NotificationCompat.Builder(AndroidApp.Context, channelId)
                 .SetContentIntent(pendingIntent)
