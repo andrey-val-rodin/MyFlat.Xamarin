@@ -45,52 +45,60 @@ namespace MobileFlat.Droid
 
         private async Task DoWorkAsync()
         {
-            var messenger = new Messenger();
-            WebService service = new WebService(messenger);
-
-            var status = await service.LoadAsync(true);
-            if (status != Models.Status.Loaded)
+            try
             {
-                if (status == Models.Status.Skipped)
+                var messenger = new Messenger();
+                WebService service = new WebService(messenger);
+
+                var status = await service.LoadAsync(true);
+                if (status != Models.Status.Loaded)
                 {
-                    // Do work tomorrow
-                    EnqueueWork(GetTomorrowTimeSpan());
-                }
-                else
-                {
-                    // Plan work soon
-                    if (WebService.IsSuitableTimeToLoad)
-                    {
-                        // Do work in an hour
-                        EnqueueWork(TimeSpan.FromHours(1));
-                    }
-                    else
+                    if (status == Models.Status.Skipped)
                     {
                         // Do work tomorrow
                         EnqueueWork(GetTomorrowTimeSpan());
                     }
+                    else
+                    {
+                        // Plan work soon
+                        if (WebService.IsSuitableTimeToLoad)
+                        {
+                            // Do work in an hour
+                            EnqueueWork(TimeSpan.FromHours(1));
+                        }
+                        else
+                        {
+                            // Do work tomorrow
+                            EnqueueWork(GetTomorrowTimeSpan());
+                        }
+                    }
+
+                    return;
                 }
 
-                return;
+                var model = service.Model;
+
+                if (model.MosOblEircBalance != 0)
+                    SendNotification("Выставлен счёт МосОблЕИРЦ", $"{model.MosOblEircBalance} руб");
+                if (model.GlobusBalance != 0)
+                    SendNotification("Выставлен счёт Глобус", $"{model.GlobusBalance} руб");
+
+                if (WebService.UseMeters)
+                {
+                    if (service.CanPassWaterMeters)
+                        SendNotification("Пора вводить значения счётчиков воды", string.Empty);
+                    if (service.CanPassElectricityMeter)
+                        SendNotification("Пора вводить значения электросчётчика", string.Empty);
+                }
+
+                // Do next work tomorrow
+                EnqueueWork(GetTomorrowTimeSpan());
             }
-
-            var model = service.Model;
-
-            if (model.MosOblEircBalance != 0)
-                SendNotification("Выставлен счёт МосОблЕИРЦ", $"{model.MosOblEircBalance} руб");
-            if (model.GlobusBalance != 0)
-                SendNotification("Выставлен счёт Глобус", $"{model.GlobusBalance} руб");
-
-            if (WebService.UseMeters)
+            catch 
             {
-                if (service.CanPassWaterMeters)
-                    SendNotification("Пора вводить значения счётчиков воды", string.Empty);
-                if (service.CanPassElectricityMeter)
-                    SendNotification("Пора вводить значения электросчётчика", string.Empty);
+                // Do next work tomorrow
+                EnqueueWork(GetTomorrowTimeSpan());
             }
-
-            // Do next work tomorrow
-            EnqueueWork(GetTomorrowTimeSpan());
         }
 
         static void SendNotification(string title, string message)
