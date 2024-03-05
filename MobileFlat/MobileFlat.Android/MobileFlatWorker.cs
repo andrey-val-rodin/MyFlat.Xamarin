@@ -15,9 +15,14 @@ namespace MobileFlat.Droid
     {
         public const string TAG = "MobileFlatWorker";
 
+        private readonly IMessenger _messenger;
+        private readonly WebService _webService;
+
         public MobileFlatWorker(Context context, WorkerParameters workerParams) :
             base(context, workerParams)
         {
+            _messenger = new Messenger();
+            _webService = new WebService(_messenger);
         }
 
         public override IListenableFuture StartWork()
@@ -47,10 +52,7 @@ namespace MobileFlat.Droid
         {
             try
             {
-                var messenger = new Messenger();
-                WebService service = new WebService(messenger);
-
-                var status = await service.LoadAsync(true);
+                var status = await _webService.LoadAsync(true);
                 if (status != Models.Status.Loaded)
                 {
                     if (status == Models.Status.Skipped)
@@ -76,18 +78,20 @@ namespace MobileFlat.Droid
                     return;
                 }
 
-                var model = service.Model;
-
-                if (model.MosOblEircBalance != 0)
-                    SendNotification("Выставлен счёт МосОблЕИРЦ", $"{model.MosOblEircBalance} руб");
-                if (model.GlobusBalance != 0)
-                    SendNotification("Выставлен счёт Глобус", $"{model.GlobusBalance} руб");
+                var model = _webService.Model;
+                if (model != null)
+                {
+                    if (model.MosOblEircBalance != 0)
+                        SendNotification("Выставлен счёт МосОблЕИРЦ", $"{model.MosOblEircBalance} руб");
+                    if (model.GlobusBalance != 0)
+                        SendNotification("Выставлен счёт Глобус", $"{model.GlobusBalance} руб");
+                }
 
                 if (WebService.UseMeters)
                 {
-                    if (service.CanPassWaterMeters)
+                    if (_webService.CanPassWaterMeters)
                         SendNotification("Пора вводить значения счётчиков воды", string.Empty);
-                    if (service.CanPassElectricityMeter)
+                    if (_webService.CanPassElectricityMeter)
                         SendNotification("Пора вводить значения электросчётчика", string.Empty);
                 }
 

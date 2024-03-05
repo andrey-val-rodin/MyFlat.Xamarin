@@ -127,7 +127,6 @@ namespace MobileFlat.Services
                     if (!IsSuitableTimeToLoad)
                         return Status.Skipped;
 
-                    LoadState();
                     if (!NeedToLoad)
                         return Status.Skipped;
                 }
@@ -225,7 +224,6 @@ namespace MobileFlat.Services
                 SetModelMeterValues();
                 Status = Status.Loaded;
                 Timestamp = DateTime.Now;
-                SaveState();
                 return Status;
             }
             catch (Exception ex)
@@ -338,70 +336,6 @@ namespace MobileFlat.Services
             }
 
             return true;
-        }
-
-        private bool LoadState()
-        {
-            bool result = false;
-            try
-            {
-                Status = Config.GetStatus(Status.NotLoaded);
-                Timestamp = Config.GetTimestamp(DateTime.MinValue);
-                Model = null;
-                _meters = null;
-
-                if (Config.GetModelIsSet(false))
-                {
-                    Model = new Main
-                    {
-                        MosOblEircBalance = Config.GetMosOblEircBalance(0),
-                        GlobusBalance = Config.GetGlobusBalance(0)
-                    };
-
-                    if (UseMeters)
-                    {
-                        var meters = Config.LoadMeters();
-                        if (meters == null)
-                            return false;
-
-                        _meters = meters;
-                        Model.Meters = new Meters();
-                        SetModelMeterValues();
-                    }
-
-                    result = true;
-                }
-                else
-                    result = false;
-            }
-            finally
-            {
-                if (!result)
-                {
-                    Model = null;
-                    Status = Status.NotLoaded;
-                    Timestamp = DateTime.MinValue;
-                }
-            }
-
-            return result;
-        }
-
-        private void SaveState()
-        {
-            Config.SetStatus(Status);
-            Config.SetTimestamp(Timestamp);
-
-            if (Model != null)
-            {
-                Config.SetMosOblEircBalance(Model.MosOblEircBalance);
-                Config.SetGlobusBalance(Model.GlobusBalance);
-                if (UseMeters)
-                    Config.SaveMeters(_meters);
-                Config.SetModelIsSet(true);
-            }
-            else
-                Config.SetModelIsSet(false);
         }
     }
 }
