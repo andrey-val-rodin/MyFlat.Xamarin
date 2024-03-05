@@ -85,6 +85,7 @@ namespace MobileFlat.Services
         {
             if (string.IsNullOrEmpty(source))
                 return null;
+
             try
             {
                 return JsonConvert.DeserializeObject<T>(source);

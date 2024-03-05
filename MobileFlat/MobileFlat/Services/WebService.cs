@@ -249,11 +249,11 @@ namespace MobileFlat.Services
             if (_meters == null)
                 throw new InvalidOperationException("_meters is null");
 
-            Model.Meters.KitchenColdWaterMeter = KitchenColdWater.Vl_last_indication;
-            Model.Meters.KitchenHotWaterMeter = KitchenHotWater.Vl_last_indication;
-            Model.Meters.BathroomColdWaterMeter = BathroomColdWater.Vl_last_indication;
-            Model.Meters.BathroomHotWaterMeter = BathroomHotWater.Vl_last_indication;
-            Model.Meters.ElectricityMeter = Electricity.Vl_last_indication;
+            Model.Meters.KitchenColdWaterMeter = (int)KitchenColdWater.Vl_last_indication;
+            Model.Meters.KitchenHotWaterMeter = (int)KitchenHotWater.Vl_last_indication;
+            Model.Meters.BathroomColdWaterMeter = (int)BathroomColdWater.Vl_last_indication;
+            Model.Meters.BathroomHotWaterMeter = (int)BathroomHotWater.Vl_last_indication;
+            Model.Meters.ElectricityMeter = (int)Electricity.Vl_last_indication;
         }
 
         private async Task SetErrorAsync(string errorMessage)
