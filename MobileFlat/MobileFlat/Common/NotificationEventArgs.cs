@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace MobileFlat
+namespace MobileFlat.Common
 {
     public class NotificationEventArgs : EventArgs
     {
