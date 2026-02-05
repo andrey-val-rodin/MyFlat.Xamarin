@@ -63,7 +63,7 @@ namespace MobileFlat.Droid
                     else
                     {
                         // Plan work soon
-                        if (WebService.IsSuitableTimeToLoad)
+                        if (WebService.IsSuitableTimeToLoad(DateTime.Now))
                         {
                             // Do work in an hour
                             EnqueueWork(TimeSpan.FromHours(1));

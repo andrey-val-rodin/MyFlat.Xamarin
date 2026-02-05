@@ -18,7 +18,7 @@ namespace MobileFlat
         {
             var mainPage = Shell.Current.CurrentPage as MainPage;
             var mainModel = (mainPage?.viewModel) ?? throw new InvalidOperationException("Missing MainPage or MainModel");
-            if (!await Config.IsSetAsync())
+            if (!await new ConfigImpl().IsSetAsync())
             {
                 mainModel.MosOblEircText = "Нет учётных данных";
                 mainModel.GlobusText = "Нет учётных данных";

@@ -158,7 +158,7 @@ namespace MobileFlat.ViewModels
                 MosOblEircText = "Загрузка...";
                 GlobusText = "Загрузка...";
 
-                if (!await Config.IsSetAsync())
+                if (!await new ConfigImpl().IsSetAsync())
                 {
                     MosOblEircText = "Нет учётных данных";
                     GlobusText = "Нет учётных данных";

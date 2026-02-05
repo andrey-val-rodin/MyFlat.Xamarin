@@ -17,22 +17,31 @@ namespace MobileFlat.Services
         private IList<MeterChildDto> _meters;
         private static readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
 
-        // Kitchen cold water   323381, 17523577
-        private MeterChildDto KitchenColdWater => GetMeter(17523577);
-        // Kitchen hot water    206922, 16702145
-        private MeterChildDto KitchenHotWater => GetMeter(16702145);
-        // Bathroom hot water   204933, 16702144
-        private MeterChildDto BathroomColdWater => GetMeter(17523578);
-        // Bathroom hot water   204933, 16702144
-        private MeterChildDto BathroomHotWater => GetMeter(16702144);
-        // Electricity          19843385, 14680903
-        private MeterChildDto Electricity => GetMeter(14680903);
+        public WebService(IMessenger messenger)
+        {
+            _messenger = messenger;
+            _mosOblEircService = new MosOblEircService(messenger);
+            _globusService = new GlobusService(messenger);
+        }
+
+        // Kitchen cold water   323381
+        public MeterChildDto KitchenColdWater => GetMeter("323381");
+        // Kitchen hot water    206922
+        public MeterChildDto KitchenHotWater => GetMeter("206922");
+        // Bathroom cold water   323391 (на самом деле - 323392, ошиблись в МосОблЕИРЦ)
+        public MeterChildDto BathroomColdWater => GetMeter("323391");
+        // Bathroom hot water   204933
+        public MeterChildDto BathroomHotWater => GetMeter("204933");
+        // Electricity          19843385
+        public MeterChildDto Electricity => GetMeter("19843385");
 
         public Main Model { get; private set; }
 
         public DateTime Timestamp { get; private set; } = DateTime.MinValue;
 
         public Status Status { get; private set; } = Status.NotLoaded;
+
+        public IConfig Config { get; set; } = new ConfigImpl();
 
         public static bool UseMeters
         {
@@ -50,22 +59,14 @@ namespace MobileFlat.Services
         {
             get
             {
-                if (!IsSuitableTimeToLoad)
+                var now = DateTime.Now;
+                if (!IsSuitableTimeToLoad(now))
                     return false;
 
                 if (Status != Status.Loaded)
                     return true;
 
-                return Timestamp.Date != DateTime.Now.Date;
-            }
-        }
-
-        public static bool IsSuitableTimeToLoad
-        {
-            get
-            {
-                var hour = DateTime.Now.Hour;
-                return hour >= 10 && hour <= 20;
+                return Timestamp.Date != now.Date;
             }
         }
 
@@ -80,10 +81,10 @@ namespace MobileFlat.Services
                 if (now.Day >= 5 && now.Day <= 25)
                 {
                     return
-                        KitchenColdWater?.GetDate().Month != now.Month ||
-                        KitchenHotWater?.GetDate().Month != now.Month ||
-                        BathroomColdWater?.GetDate().Month != now.Month ||
-                        BathroomHotWater?.GetDate().Month != now.Month;
+                        KitchenColdWater?.GetDate()?.Month != now.Month ||
+                        KitchenHotWater?.GetDate()?.Month != now.Month ||
+                        BathroomColdWater?.GetDate()?.Month != now.Month ||
+                        BathroomHotWater?.GetDate()?.Month != now.Month;
                 }
 
                 return false;
@@ -99,22 +100,40 @@ namespace MobileFlat.Services
 
                 var now = DateTime.Now;
                 if (now.Day >= 15 && now.Day <= 26)
-                    return Electricity?.GetDate().Month != now.Month;
+                    return Electricity?.GetDate()?.Month != now.Month;
 
                 return false;
             }
         }
 
-        public WebService(IMessenger messenger)
+        private MeterChildDto GetMeter(string id)
         {
-            _messenger = messenger;
-            _mosOblEircService = new MosOblEircService(messenger);
-            _globusService = new GlobusService(messenger);
+            return _meters?.FirstOrDefault(c => c.Nm_counter == id);
         }
 
-        private MeterChildDto GetMeter(int id)
+        public static bool IsSuitableTimeToLoad(DateTime time)
         {
-            return _meters?.FirstOrDefault(c => c.Id_counter == id);
+            var hour = time.Hour;
+            return hour >= 10 && hour <= 20;
+        }
+
+        public static TimeSpan GetTomorrowTimeSpan()
+        {
+            var now = DateTime.Now;
+            var tomorrow = now;
+            if (now.Hour >= 10)
+                tomorrow = tomorrow.AddDays(1);
+            var time = new DateTime(tomorrow.Year, tomorrow.Month, tomorrow.Day, 10, 0, 0);
+            return time - now;
+        }
+
+        public static TimeSpan GetOneHourTimeSpan()
+        {
+            var result = TimeSpan.FromHours(1);
+            if (IsSuitableTimeToLoad(DateTime.Now + result))
+                return result;
+
+            return GetTomorrowTimeSpan();
         }
 
         public async Task<Status> LoadAsync(bool checkConditions)
@@ -124,7 +143,7 @@ namespace MobileFlat.Services
             {
                 if (checkConditions)
                 {
-                    if (!IsSuitableTimeToLoad)
+                    if (!IsSuitableTimeToLoad(DateTime.Now))
                         return Status.Skipped;
 
                     if (!NeedToLoad)

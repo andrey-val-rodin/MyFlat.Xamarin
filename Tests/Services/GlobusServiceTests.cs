@@ -18,7 +18,7 @@ namespace Tests.Services
         public async Task AuthorizeAsync_CorrectCredentials_True()
         {
             var service = new GlobusService(new MessengerStub());
-            Assert.True(await service.AuthorizeAsync(Config.GlobusUser, Config.GlobusPassword));
+            Assert.True(await service.AuthorizeAsync(ConfigStub.GlobusUser, ConfigStub.GlobusPassword));
             await service.LogoffAsync();
         }
 
@@ -26,7 +26,7 @@ namespace Tests.Services
         public async Task LogoffAsync_CorrectCredentials_True()
         {
             var service = new GlobusService(new MessengerStub());
-            await service.AuthorizeAsync(Config.GlobusUser, Config.GlobusPassword);
+            await service.AuthorizeAsync(ConfigStub.GlobusUser, ConfigStub.GlobusPassword);
             Assert.True(await service.LogoffAsync());
         }
 
@@ -41,7 +41,7 @@ namespace Tests.Services
         public async Task GetBalanceAsync_Success()
         {
             var service = new GlobusService(new MessengerStub());
-            await service.AuthorizeAsync(Config.GlobusUser, Config.GlobusPassword);
+            await service.AuthorizeAsync(ConfigStub.GlobusUser, ConfigStub.GlobusPassword);
             Assert.True(await service.GetBalanceAsync() >= 0);
             await service.LogoffAsync();
         }

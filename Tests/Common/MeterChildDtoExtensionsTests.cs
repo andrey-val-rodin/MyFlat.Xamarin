@@ -18,10 +18,9 @@ namespace Tests.Common
         }
 
         [Fact]
-        public void GetDate_InvalidValue_ValidResult()
+        public void GetDate_InvalidValue_Null()
         {
-            Assert.Throws<FormatException>(() =>
-                new MeterChildDto { Dt_last_indication = "2021-07-22 21:13" }.GetDate());
+            Assert.Null(new MeterChildDto { Dt_last_indication = "2021-07-22 21:13" }.GetDate());
         }
     }
 }
