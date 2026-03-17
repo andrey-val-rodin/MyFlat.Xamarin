@@ -38,20 +38,18 @@ namespace MobileFlat.Common
             result = null;
             try
             {
-                var pattern = "'bitrix_sessid' {0,}: {0,}'.*'";
-                var match = Regex.Match(html, pattern);
-                if (!match.Success)
-                    return false;
-
-                var strings = match.Value.Split('\'');
-                result = strings[3];
+                // Double or single quotas in substring "bitrix_sessid":"2ef02a737a8389eca16e2a164cbe0241"
+                const string pattern = @"['""]bitrix_sessid['""]\s*:\s*['""]([^'"")]+)['""]";
+                Match match = Regex.Match(html, pattern, RegexOptions.IgnoreCase);
+                if (match.Success && match.Groups.Count > 1)
+                    result = match.Groups[1].Value;
             }
             catch
             {
                 return false;
             }
 
-            return true;
+            return !string.IsNullOrWhiteSpace(result);
         }
     }
 }
